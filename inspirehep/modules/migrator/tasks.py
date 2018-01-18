@@ -242,10 +242,13 @@ def migrate_chunk(chunk, skip_files=False):
 
 @shared_task()
 def add_citation_counts(chunk_size=500, request_timeout=120):
+    numeric_pid_types = ('lit', 'con', 'exp', 'jou', 'aut', 'job', 'ins')
+
     def _build_recid_to_uuid_map(citations_lookup):
         pids = PersistentIdentifier.query.filter(
-            PersistentIdentifier.object_type == 'rec').yield_per(1000)
-
+            PersistentIdentifier.object_type == 'rec',
+            PersistentIdentifier.pid_type.in_(numeric_pid_types)).yield_per(
+            1000)
         with click.progressbar(pids) as bar:
             return {
                 pid.object_uuid: citations_lookup[int(pid.pid_value)]
