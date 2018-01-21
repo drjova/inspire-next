@@ -31,7 +31,16 @@ from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 from inspire_utils.record import get_value
 
 from .providers import InspireRecordIdProvider
-from .utils import get_pid_type_from_schema
+from .utils import get_pid_type_from_schema, get_new_pid_values, \
+    get_pid_type_values
+
+
+def inspire_recid_minter_update(record_uuid, data):
+    """Update record identifiers."""
+    # get all ids for this ``object_uuid``
+    pids = PersistentIdentifier.query.filter_by(object_uuid=record_uuid).all()
+    # mint arxiv eprint
+    inspire_arxiv_minter(record_uuid, data, pids=pids)
 
 
 def inspire_recid_minter(record_uuid, data):
@@ -59,28 +68,32 @@ def inspire_arxiv_minter(record_uuid, data, pids=None):
     Args:
         record_uuid (str): a record.
         data (dict): record metadata
+
     Returns:
         PersistentIdentifier: a persistent identifier.
     """
+    arxiv_eprints = []
     if pids is not None:
-        arxiv_eprints = get_value(data, 'arxiv_eprints.value[:]')
+        current = get_pid_type_values(pids, 'arxiv')
+        updated = get_value(data, 'arxiv_eprints.value[:]', default=[])
+        # get the new pids to create
+        arxiv_eprints = get_new_pid_values(current, updated)
     else:
-        arxiv_eprints = get_value(data, 'arxiv_eprints.value[:]')
+        arxiv_eprints = get_value(data, 'arxiv_eprints.value[:]', default=[])
 
     # add all the new ones
-    if arxiv_eprints:
-        for arxiv_eprint in arxiv_eprints:
-            try:
-                PersistentIdentifier.create(
-                    'arxiv',
-                    str(arxiv_eprint),
-                    object_type='rec',
-                    object_uuid=record_uuid,
-                    status=PIDStatus.REGISTERED
-                 )
-            except PIDAlreadyExists:
-                current_app.logger.error(
-                    'PID key arxiv with value {0} already exists'.format(
-                        arxiv_eprint
-                    )
+    for arxiv_eprint in arxiv_eprints:
+        try:
+            PersistentIdentifier.create(
+                'arxiv',
+                str(arxiv_eprint),
+                object_type='rec',
+                object_uuid=record_uuid,
+                status=PIDStatus.REGISTERED
+             )
+        except PIDAlreadyExists:
+            current_app.logger.error(
+                'PID key isbn with value {0} already exists for {1}.'.format(
+                    arxiv_eprint, record_uuid
                 )
+            )

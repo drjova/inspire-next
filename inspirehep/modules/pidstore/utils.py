@@ -68,3 +68,44 @@ def get_pid_type_from_schema(schema):
         return 'lit'
 
     return get_pid_type_from_endpoint(schema_name)
+
+
+def get_new_pid_values(current, updated):
+    """Get the new pids from the updated record.
+    Compares the current ``pid.values`` with the updated ones.
+
+    Args:
+        current list(str): a list of the existing ``pids``.
+        updated list(str): a list of the new ``pids``.
+
+    Returns:
+        list(str): a list of the new ``pids``.
+    """
+    return list(set(updated) - set(current))
+
+
+def get_deleted_pid_values(current, updated):
+    """Get the deleted pids from the updated record.
+    Compares the current ``pid.values`` with the updated ones.
+
+    Args:
+        current list(str): a list of the existing ``pids``.
+        updated list(str): a list of the new ``pids``.
+
+    Returns:
+        list(str): a list of the new ``pids``.
+    """
+    return list(set(current) - set(updated))
+
+
+def get_pid_type_values(pids, pid_type):
+    """Return the pids values for a give ``pid_type``.
+
+    Args:
+        pids list(PersistentIdentifier): a list of ``pids``.
+        pid_type (str): a persistent identifier type.
+
+    Returns:
+        list(str): a list of pids.
+    """
+    return [pid.pid_value for pid in pids if pid.pid_type == pid_type]

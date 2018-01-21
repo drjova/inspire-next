@@ -27,8 +27,9 @@ from __future__ import absolute_import, division, print_function
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_workflows import workflow_object_class
 
-from inspirehep.modules.pidstore.minters import inspire_arxiv_minter
 from inspirehep.modules.records.api import InspireRecord
+from inspirehep.modules.pidstore.minters import inspire_arxiv_minter, \
+    inspire_recid_minter_update
 
 
 def test_arxiv_minter(app):
@@ -76,3 +77,26 @@ def test_arxiv_minter(app):
         object_uuid=str(record.id), pid_type='arxiv').all()
     # should be only 2
     assert len(pids) == 2
+
+    # Update record
+    data['arxiv_eprints'].append({
+        'categories': [
+            'astro-ph.HE'
+        ],
+        'value': '1901.33333'
+    })
+
+    # a workflow object
+    obj = workflow_object_class.create(
+        data=data,
+        id_user=1,
+        data_type='hep'
+    )
+    record.update(obj.data, files_src_records=[obj])
+    # update
+    inspire_recid_minter_update(str(record.id), obj.data)
+    # get all pids
+    pids = PersistentIdentifier.query.filter_by(
+        object_uuid=str(record.id), pid_type='arxiv').all()
+    # should be only 3
+    assert len(pids) == 3
