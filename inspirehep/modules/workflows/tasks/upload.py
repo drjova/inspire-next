@@ -56,6 +56,7 @@ def store_record(obj, eng):
         obj.data['control_number'] = record['control_number']
         record.clear()
         record.update(obj.data, files_src_records=[obj])
+        inspire_recid_minter_update(str(record.id), record)
 
     else:
         # Skip the files to avoid issues in case the record has already pid

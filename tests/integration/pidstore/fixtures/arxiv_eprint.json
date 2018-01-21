@@ -1,0 +1,514 @@
+{
+  "created": null,
+  "id": 1632325,
+  "links": {
+    "self": "https://qa.inspirehep.net/api/literature/1632325"
+  },
+  "metadata": {
+    "$schema": "https://qa.inspirehep.net/schemas/records/hep.json",
+    "_collections": [
+      "Literature"
+    ],
+    "_created": "2018-01-19T00:00:00+00:00",
+    "_updated": "2018-01-19T02:18:51.311726+00:00",
+    "abstracts": [
+      {
+        "abstract_source_suggest": {
+          "input": "arXiv",
+          "output": "arXiv"
+        },
+        "source": "arXiv",
+        "value": "In order to study the correlation between clusters and nucleons in light nuclei, we formulate a new superposed THSR wave function which describes both spatial large spreading and cluster-correlated dynamics of valence nucleons. By using the new THSR wave function, the binding energy of 9B is essentially improved comparing with our previous studies. We calculate the excited states of 9B and obtain the energy spectrum of 9B which is consistent with the experimental results, including prediction of the 1/2+ excited state of 9B which is not fixed yet experimentally. We study the proton dynamics in 9B and find that the cluster-proton correlation plays an essential role for the proton dynamics in the ground state of 9B. Further more, we discuss the density distribution of the valence proton with special attention to its tail structure. Finally, the resonance nature of excited states of 9B is illustrated by comparing root-mean-square radii between the ground and excited states."
+      }
+    ],
+    "acquisition_source": {
+      "datetime": "2018-01-19T03:03:16.286202",
+      "method": "hepcrawl",
+      "source": "arXiv",
+      "submission_number": "e5c2ff50fcbc11e794df02163e0191a4"
+    },
+    "arxiv_eprints": [
+      {
+        "categories": [
+          "nucl-th"
+        ],
+        "value": "1801.05964"
+      }
+    ],
+    "author_count": 11,
+    "authors": [
+      {
+        "full_name": "Zhao, Qing",
+        "name_suggest": {
+          "input": [
+            "Zhao, Q",
+            "Zhao, Qing",
+            "Q, Zhao",
+            "Q Zhao",
+            "Zhao Qing",
+            "Zhao Q",
+            "Zhao",
+            "Qing Zhao",
+            "Qing, Zhao"
+          ],
+          "output": "Zhao, Qing",
+          "payload": {
+            "bai": null
+          }
+        },
+        "name_variations": [
+          "Zhao, Q",
+          "Zhao, Qing",
+          "Q, Zhao",
+          "Q Zhao",
+          "Zhao Qing",
+          "Zhao Q",
+          "Zhao",
+          "Qing Zhao",
+          "Qing, Zhao"
+        ],
+        "signature_block": "Zq",
+        "uuid": "a5d87f38-1e3a-4cba-ae39-f03471ba958c"
+      },
+      {
+        "full_name": "Ren, Zhongzhou",
+        "name_suggest": {
+          "input": [
+            "Zhongzhou Ren",
+            "Z, Ren",
+            "Ren Zhongzhou",
+            "Zhongzhou, Ren",
+            "Z Ren",
+            "Ren, Z",
+            "Ren Z",
+            "Ren",
+            "Ren, Zhongzhou"
+          ],
+          "output": "Ren, Zhongzhou",
+          "payload": {
+            "bai": null
+          }
+        },
+        "name_variations": [
+          "Zhongzhou Ren",
+          "Z, Ren",
+          "Ren Zhongzhou",
+          "Zhongzhou, Ren",
+          "Z Ren",
+          "Ren, Z",
+          "Ren Z",
+          "Ren",
+          "Ren, Zhongzhou"
+        ],
+        "signature_block": "RANz",
+        "uuid": "1e8d5ca7-ac97-404d-a3f9-cd2ef0a06f7b"
+      },
+      {
+        "full_name": "Lyu, Mengjiao",
+        "name_suggest": {
+          "input": [
+            "Lyu",
+            "Lyu, Mengjiao",
+            "M Lyu",
+            "Lyu Mengjiao",
+            "Mengjiao Lyu",
+            "M, Lyu",
+            "Lyu, M",
+            "Mengjiao, Lyu",
+            "Lyu M"
+          ],
+          "output": "Lyu, Mengjiao",
+          "payload": {
+            "bai": null
+          }
+        },
+        "name_variations": [
+          "Lyu",
+          "Lyu, Mengjiao",
+          "M Lyu",
+          "Lyu Mengjiao",
+          "Mengjiao Lyu",
+          "M, Lyu",
+          "Lyu, M",
+          "Mengjiao, Lyu",
+          "Lyu M"
+        ],
+        "signature_block": "Lm",
+        "uuid": "d3e5c34f-e2e0-4921-b9eb-31ba81e1febc"
+      },
+      {
+        "full_name": "Horiuchi, Hisashi",
+        "name_suggest": {
+          "input": [
+            "H Horiuchi",
+            "Horiuchi, H",
+            "Hisashi, Horiuchi",
+            "Hisashi Horiuchi",
+            "Horiuchi",
+            "Horiuchi H",
+            "Horiuchi, Hisashi",
+            "H, Horiuchi",
+            "Horiuchi Hisashi"
+          ],
+          "output": "Horiuchi, Hisashi",
+          "payload": {
+            "bai": null
+          }
+        },
+        "name_variations": [
+          "H Horiuchi",
+          "Horiuchi, H",
+          "Hisashi, Horiuchi",
+          "Hisashi Horiuchi",
+          "Horiuchi",
+          "Horiuchi H",
+          "Horiuchi, Hisashi",
+          "H, Horiuchi",
+          "Horiuchi Hisashi"
+        ],
+        "signature_block": "HARACh",
+        "uuid": "70d7e62d-c7be-4b72-be04-3a0235575161"
+      },
+      {
+        "full_name": "Funaki, Yasuro",
+        "name_suggest": {
+          "input": [
+            "Funaki, Yasuro",
+            "Yasuro Funaki",
+            "Funaki Yasuro",
+            "Funaki Y",
+            "Yasuro, Funaki",
+            "Funaki, Y",
+            "Y, Funaki",
+            "Funaki",
+            "Y Funaki"
+          ],
+          "output": "Funaki, Yasuro",
+          "payload": {
+            "bai": null
+          }
+        },
+        "name_variations": [
+          "Funaki, Yasuro",
+          "Yasuro Funaki",
+          "Funaki Yasuro",
+          "Funaki Y",
+          "Yasuro, Funaki",
+          "Funaki, Y",
+          "Y, Funaki",
+          "Funaki",
+          "Y Funaki"
+        ],
+        "signature_block": "FANACy",
+        "uuid": "87a36cb5-c20c-4a67-878a-c7b72bc28745"
+      },
+      {
+        "full_name": "R\u00f6pke, Gerd",
+        "name_suggest": {
+          "input": [
+            "Ropke G",
+            "Ropke",
+            "Ropke, Gerd",
+            "Gerd, Ropke",
+            "Gerd Ropke",
+            "Ropke Gerd",
+            "Ropke, G",
+            "G Ropke",
+            "G, Ropke"
+          ],
+          "output": "R\u00f6pke, Gerd",
+          "payload": {
+            "bai": null
+          }
+        },
+        "name_variations": [
+          "Ropke G",
+          "Ropke",
+          "Ropke, Gerd",
+          "Gerd, Ropke",
+          "Gerd Ropke",
+          "Ropke Gerd",
+          "Ropke, G",
+          "G Ropke",
+          "G, Ropke"
+        ],
+        "signature_block": "RAPCg",
+        "uuid": "42965555-19ff-4588-aec7-f87bec75b6e2"
+      },
+      {
+        "full_name": "Schuck, Peter",
+        "name_suggest": {
+          "input": [
+            "Peter, Schuck",
+            "Schuck P",
+            "Schuck, Peter",
+            "Schuck",
+            "P Schuck",
+            "P, Schuck",
+            "Peter Schuck",
+            "Schuck, P",
+            "Schuck Peter"
+          ],
+          "output": "Schuck, Peter",
+          "payload": {
+            "bai": null
+          }
+        },
+        "name_variations": [
+          "Peter, Schuck",
+          "Schuck P",
+          "Schuck, Peter",
+          "Schuck",
+          "P Schuck",
+          "P, Schuck",
+          "Peter Schuck",
+          "Schuck, P",
+          "Schuck Peter"
+        ],
+        "signature_block": "SACp",
+        "uuid": "1c2b26e2-88cc-45d1-9931-3001b3980d7d"
+      },
+      {
+        "full_name": "Tohsaki, Akihiro",
+        "name_suggest": {
+          "input": [
+            "Tohsaki Akihiro",
+            "A, Tohsaki",
+            "A Tohsaki",
+            "Akihiro Tohsaki",
+            "Tohsaki A",
+            "Akihiro, Tohsaki",
+            "Tohsaki",
+            "Tohsaki, A",
+            "Tohsaki, Akihiro"
+          ],
+          "output": "Tohsaki, Akihiro",
+          "payload": {
+            "bai": null
+          }
+        },
+        "name_variations": [
+          "Tohsaki Akihiro",
+          "A, Tohsaki",
+          "A Tohsaki",
+          "Akihiro Tohsaki",
+          "Tohsaki A",
+          "Akihiro, Tohsaki",
+          "Tohsaki",
+          "Tohsaki, A",
+          "Tohsaki, Akihiro"
+        ],
+        "signature_block": "TASACa",
+        "uuid": "8666eb75-3614-44c9-aa8f-00e5b6db6c3e"
+      },
+      {
+        "full_name": "Xu, Chang",
+        "name_suggest": {
+          "input": [
+            "Xu C",
+            "Xu Chang",
+            "C, Xu",
+            "Chang Xu",
+            "Xu, Chang",
+            "Xu, C",
+            "C Xu",
+            "Chang, Xu",
+            "Xu"
+          ],
+          "output": "Xu, Chang",
+          "payload": {
+            "bai": null
+          }
+        },
+        "name_variations": [
+          "Xu C",
+          "Xu Chang",
+          "C, Xu",
+          "Chang Xu",
+          "Xu, Chang",
+          "Xu, C",
+          "C Xu",
+          "Chang, Xu",
+          "Xu"
+        ],
+        "signature_block": "Xc",
+        "uuid": "aa8d5188-7f5d-42eb-b265-5ae6c1d5bf2e"
+      },
+      {
+        "full_name": "Yamada, Taiichi",
+        "name_suggest": {
+          "input": [
+            "Yamada",
+            "Yamada, T",
+            "Taiichi Yamada",
+            "Taiichi, Yamada",
+            "Yamada Taiichi",
+            "Yamada T",
+            "T Yamada",
+            "T, Yamada",
+            "Yamada, Taiichi"
+          ],
+          "output": "Yamada, Taiichi",
+          "payload": {
+            "bai": null
+          }
+        },
+        "name_variations": [
+          "Yamada",
+          "Yamada, T",
+          "Taiichi Yamada",
+          "Taiichi, Yamada",
+          "Yamada Taiichi",
+          "Yamada T",
+          "T Yamada",
+          "T, Yamada",
+          "Yamada, Taiichi"
+        ],
+        "signature_block": "YANADt",
+        "uuid": "9303a15e-ca50-4927-8767-7f4f070e9340"
+      },
+      {
+        "full_name": "Zhou, Bo",
+        "name_suggest": {
+          "input": [
+            "Bo, Zhou",
+            "Zhou",
+            "B Zhou",
+            "Zhou, Bo",
+            "Bo Zhou",
+            "Zhou B",
+            "B, Zhou",
+            "Zhou Bo",
+            "Zhou, B"
+          ],
+          "output": "Zhou, Bo",
+          "payload": {
+            "bai": null
+          }
+        },
+        "name_variations": [
+          "Bo, Zhou",
+          "Zhou",
+          "B Zhou",
+          "Zhou, Bo",
+          "Bo Zhou",
+          "Zhou B",
+          "B, Zhou",
+          "Zhou Bo",
+          "Zhou, B"
+        ],
+        "signature_block": "Zb",
+        "uuid": "138fd54b-fb58-4492-b2f7-1d509a59036c"
+      }
+    ],
+    "citeable": true,
+    "control_number": 1632325,
+    "core": false,
+    "curated": false,
+    "document_type": [
+      "article"
+    ],
+    "documents": [
+      {
+        "fulltext": true,
+        "hidden": true,
+        "key": "1801.05964.pdf",
+        "url": "/afs/cern.ch/project/inspire/PROD/var/data/files/g148/2974281/content.pdf;1"
+      }
+    ],
+    "earliest_date": "2018-01-18",
+    "facet_inspire_doc_type": [
+      "article"
+    ],
+    "figures": [
+      {
+        "caption": "Theoretical and experimental results of the energy spectrum of ${}^{9}$B.",
+        "key": "bindenelevel-eps-converted-to.png",
+        "url": "/afs/cern.ch/project/inspire/PROD/var/data/files/g148/2974280/content.png;1"
+      },
+      {
+        "caption": "Density distributions of the extra proton of $^9$B obtained from different THSR wave functions. The left figure corresponds to traditional THSR wave function. The right one corresponds to the new THSR wave function.",
+        "key": "c-032-fix-4-eps-converted-to.png",
+        "url": "/afs/cern.ch/project/inspire/PROD/var/data/files/g148/2974277/content.png;1"
+      },
+      {
+        "caption": "The excitation energy of the $1/2^{+}$ state in ${}^{9}$B with increasing sample size in our Monte Carlo calculation. The dotted line denotes the experimental prediction in Ref.~\\cite{Tilley2004}.",
+        "key": "ErBarCurve-eps-converted-to.png",
+        "url": "/afs/cern.ch/project/inspire/PROD/var/data/files/g148/2974275/content.png;1"
+      },
+      {
+        "caption": "Density distributions of the extra proton in the $y=0$ cross section obtained from different terms in the new superposed THSR wave function. The left corresponds to the cluster-correlated terms $\\Phi_1+\\Phi_{2}$. The right corresponds to the large spreading configuration $\\Phi_{3}$. Parameter $\\beta$s are selected as the optimized values of the new superposed THSR wave function.",
+        "key": "c-0-fix-eps-converted-to.png",
+        "url": "/afs/cern.ch/project/inspire/PROD/var/data/files/g148/2974278/content.png;1"
+      },
+      {
+        "caption": "Energy curve of the ground state of $^9$B with respect to the ratio $d/c$, while other parameters are fixed as the same.",
+        "key": "eneCurveFitdc-eps-converted-to.png",
+        "url": "/afs/cern.ch/project/inspire/PROD/var/data/files/g148/2974276/content.png;1"
+      },
+      {
+        "caption": "The angular-averaged density distributions of the additional proton. The blue line is obtained by the traditional THSR wave function while the red line is obtained by the new THSR wave function(color online).",
+        "key": "logrho1-eps-converted-to.png",
+        "url": "/afs/cern.ch/project/inspire/PROD/var/data/files/g148/2974279/content.png;1"
+      },
+      {
+        "caption": "The excited energy of the $1/2^{+}$ state of ${}^{9}$B with our new superposed THSR wave function (line) compared with many other experimental predictions (dots).",
+        "key": "enecompare-eps-converted-to.png",
+        "url": "/afs/cern.ch/project/inspire/PROD/var/data/files/g148/2974274/content.png;1"
+      },
+      {
+        "caption": "Density distributions of the extra proton of $^9$B obtained from different THSR wave functions. The left figure corresponds to traditional THSR wave function. The right one corresponds to the new THSR wave function.",
+        "key": "Dextra-xz-fix-eps-converted-to.png",
+        "url": "/afs/cern.ch/project/inspire/PROD/var/data/files/g148/2974282/content.png;1"
+      },
+      {
+        "caption": "Density distributions of the extra proton in the $y=0$ cross section obtained from different terms in the new superposed THSR wave function. The left corresponds to the cluster-correlated terms $\\Phi_1+\\Phi_{2}$. The right corresponds to the large spreading configuration $\\Phi_{3}$. Parameter $\\beta$s are selected as the optimized values of the new superposed THSR wave function.",
+        "key": "c-05-fix-eps-converted-to.png",
+        "url": "/afs/cern.ch/project/inspire/PROD/var/data/files/g148/2974283/content.png;1"
+      },
+      {
+        "caption": "Theoretical and experimental energy spectra of ${}^{9}$B. The states with higher energy, which are found in experiment, are not considered in our calculation because of the limitation of computation power.",
+        "key": "energylevel-eps-converted-to.png",
+        "url": "/afs/cern.ch/project/inspire/PROD/var/data/files/g148/2974273/content.png;1"
+      }
+    ],
+    "inspire_categories": [
+      {
+        "source": "arxiv",
+        "term": "Theory-Nucl"
+      }
+    ],
+    "legacy_creation_date": "2018-01-19",
+    "license": [
+      {
+        "license": "arXiv nonexclusive-distrib 1.0",
+        "url": "http://arxiv.org/licenses/nonexclusive-distrib/1.0/"
+      }
+    ],
+    "number_of_pages": 16,
+    "preprint_date": "2018-01-18",
+    "public_notes": [
+      {
+        "source": "arXiv",
+        "value": "16 pages, 8 figures"
+      }
+    ],
+    "self": {
+      "$ref": "http://qa.inspirehep.net/api/literature/1632325"
+    },
+    "self_recid": 1632325,
+    "titles": [
+      {
+        "source": "arXiv",
+        "title": "Investigation of the 9B nucleus and its cluster-nucleon correlations"
+      }
+    ],
+    "urls": [
+      {
+        "description": "00006 The excited energy of the $1/2^{+}$ state of ${}^{9}$B with our new superposed THSR wave function (line) compared with many other experimental predictions (dots).",
+        "value": "http://inspireheptest.cern.ch/record/1632325/files/enecompare-eps-converted-to.png"
+      }
+    ]
+  },
+  "updated": "2018-01-19T02:18:51.311726+00:00"
+}
