@@ -20,20 +20,20 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
-"""Minter ``arxiv`` integration."""
+"""Minter ``isbn`` integration."""
 
 from __future__ import absolute_import, division, print_function
 
-from invenio_pidstore.models import PersistentIdentifier
+from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 from invenio_workflows import workflow_object_class
 
 from inspirehep.modules.records.api import InspireRecord
-from inspirehep.modules.pidstore.minters import inspire_arxiv_minter, \
+from inspirehep.modules.pidstore.minters import inspire_isbn_minter, \
     inspire_recid_minter_update
 
 
-def test_arxiv_minter(app):
-    """Mint arxiv eprints."""
+def test_isbn_minter(app):
+    """Mint isbn."""
 
     data = {
         '$schema': 'http://localhost:5000/schemas/records/hep.json',
@@ -45,20 +45,14 @@ def test_arxiv_minter(app):
         'titles': [
             {'title': 'merged'},
         ],
-        'arxiv_eprints': [
+        'isbns': [
             {
-                'categories': [
-                    'astro-ph.HE'
-                ],
-                'value': '1701.11111'
+                'value': '11111111111'
             },
             {
-                'categories': [
-                    'astro-ph.HE'
-                ],
-                'value': '1801.22222'
+                'value': '22222222222'
             }
-        ]
+        ],
     }
     # a workflow object
     obj = workflow_object_class.create(
@@ -70,22 +64,22 @@ def test_arxiv_minter(app):
     record = InspireRecord.create(obj.data, id_=None, skip_files=True)
     # commit the record
     record.commit()
-    # mint the ``arxiv``
-    inspire_arxiv_minter(str(record.id), record)
+    # mint the ``isbn``
+    inspire_isbn_minter(str(record.id), record)
     # get all pids
     pids = PersistentIdentifier.query.filter_by(
-        object_uuid=str(record.id), pid_type='arxiv').all()
+        object_uuid=str(record.id), pid_type='isbn').all()
     # should be only 2
     assert len(pids) == 2
-
     # Update record
-    data['arxiv_eprints'].append({
-        'categories': [
-            'astro-ph.HE'
-        ],
-        'value': '1901.33333'
-    })
-
+    data['isbns'] = [
+        {
+            'value': '11111111111'
+        },
+        {
+            'value': '33333333333'
+        }
+    ]
     # a workflow object
     obj = workflow_object_class.create(
         data=data,
@@ -95,10 +89,12 @@ def test_arxiv_minter(app):
     record.update(obj.data, files_src_records=[obj])
     # update
     inspire_recid_minter_update(str(record.id), obj.data)
-    # commit the record
-    record.commit()
     # get all pids
     pids = PersistentIdentifier.query.filter_by(
-        object_uuid=str(record.id), pid_type='arxiv').all()
-    # should be only 3
-    assert len(pids) == 3
+        object_uuid=str(record.id), pid_type='isbn', status=PIDStatus.REGISTERED).all()
+    # should be only 2
+    assert len(pids) == 2
+    pid_values = [pid.pid_value for pid in pids]
+    assert '11111111111' in pid_values
+    assert '33333333333' in pid_values
+    assert '22222222222' not in pid_values
