@@ -26,10 +26,10 @@ from __future__ import absolute_import, division, print_function
 
 from collections import namedtuple
 
+from invenio_pidstore.fetchers import FetchedPID
+
 from .providers import InspireRecordIdProvider
 from .utils import get_pid_type_from_schema
-
-FetchedPID = namedtuple('FetchedPID', ['provider', 'pid_type', 'pid_value'])
 
 
 def inspire_recid_fetcher(record_uuid, data):

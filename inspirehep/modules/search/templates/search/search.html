@@ -37,7 +37,6 @@
 {%- endblock javascript %}
 
 {%- block additional_javascript -%}
-  {% include "inspirehep_theme/typeahead.html" %}
   <script>
     require([
       'inspirehep-search'
@@ -45,9 +44,7 @@
       // When the DOM is ready bootstrap the AngularJS modules
       angular.element(document).ready(function() {
         angular.bootstrap(
-          document.getElementById("invenio-search"), ['angular-loading-bar',
-                                                      'inspirehep',
-                                                      'invenioSearchAutocomplete']
+          document.getElementById("invenio-search"), ['angular-loading-bar', 'inspirehep']
         );
       });
     });
