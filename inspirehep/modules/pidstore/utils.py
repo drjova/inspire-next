@@ -60,11 +60,12 @@ def get_pid_type_from_schema(schema):
     Literature records. This implementation exploits this by falling back to
     ``get_pid_type_from_endpoint``.
     """
-    def _get_schema_name_from_schema(schema):
-        return urlsplit(schema).path.split('/')[-1].split('.')[0]
-
     schema_name = _get_schema_name_from_schema(schema)
-    if schema_name == 'hep':  # FIXME: remove when hep.json -> literature.json
+    if schema_name == 'hep':
         return 'lit'
-
     return get_pid_type_from_endpoint(schema_name)
+
+
+def _get_schema_name_from_schema(schema):
+    """Get schema name from schema."""
+    return urlsplit(schema).path.split('/')[-1].split('.')[0]

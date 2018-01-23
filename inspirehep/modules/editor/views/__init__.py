@@ -20,6 +20,6 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
-"""INSPIRE editor."""
+"""INSPIRE editor views."""
 
 from __future__ import absolute_import, division, print_function

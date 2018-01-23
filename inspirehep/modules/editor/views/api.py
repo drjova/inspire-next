@@ -20,15 +20,18 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
-"""Editor api views."""
+"""Editor API views."""
 
 from __future__ import absolute_import, division, print_function
 
-from flask import Blueprint, jsonify, request, current_app
+from flask import abort, Blueprint, jsonify, request, current_app
+from flask.views import MethodView
 from flask_login import current_user
 from fs.opener import fsopendir
 from sqlalchemy_continuum import transaction_class, version_class
 from werkzeug.utils import secure_filename
+from webargs import fields
+from webargs.flaskparser import use_kwargs
 
 from invenio_db import db
 from invenio_records.models import RecordMetadata
@@ -37,12 +40,16 @@ from refextract import (
     extract_references_from_url,
 )
 
+from inspire_schemas.utils import load_schema
+
 from inspirehep.modules.editor.permissions import (
     editor_permission,
     editor_use_api_permission,
 )
-from inspirehep.modules.pidstore.utils import get_pid_type_from_endpoint
+from inspirehep.modules.pidstore.utils import get_pid_type_from_endpoint, \
+    _get_schema_name_from_schema
 from inspirehep.modules.tools import authorlist
+from inspirehep.modules.records.json_ref_loader import load_resolved_schema
 from inspirehep.utils import tickets
 from inspirehep.utils.record_getter import get_db_record
 from inspirehep.utils.references import (
@@ -51,6 +58,7 @@ from inspirehep.utils.references import (
 )
 from inspirehep.utils.url import copy_file
 from inspirehep.modules.workflows.workflows.manual_merge import start_merger
+from inspirehep.modules.cache import lock_cache
 
 MAX_UNIQUE_KEY_COUNT = 100
 
@@ -287,3 +295,57 @@ def upload_files():
         full_url = fs.getsyspath(filename)
 
     return jsonify({'path': full_url})
+
+
+class EditorResource(MethodView):
+    """Editor resource."""
+
+    decorators = [editor_permission]
+
+    def get(self, endpoint, pid_value):
+        """Get the editor resources."""
+        pid_type = get_pid_type_from_endpoint(endpoint)
+        record = get_db_record(pid_type, pid_value)
+        parse = _get_schema_name_from_schema(record['$schema'])
+        schema = load_schema(parse, resolved=True)
+        return jsonify(dict(record=record.dumps(), schema=schema))
+
+
+class LockEditorResource(MethodView):
+    """Lock editor resource."""
+
+    decorators = [editor_permission]
+
+    def get(self, endpoint, pid_value, action=None):
+        status = lock_cache.get(pid_value)
+        if status is not None:
+            abort(423)
+        return '', 200
+
+    def post(self, endpoint, pid_value, action=None):
+        """Lock pid_value."""
+        if action == 'lock':
+            lock_cache.set(pid_value, 'locked')
+            return jsonify(dict(message='Success lock.'))
+        elif action == 'unlock':
+            lock_cache.delete(pid_value)
+            return jsonify(dict(message='Success unlock.'))
+        abort(405)
+
+# Lock Editor resource
+lock_editor_resource = LockEditorResource.as_view('lock_editor')
+# Editor resource
+editor_resource = EditorResource.as_view('editor')
+
+blueprint_api.add_url_rule(
+    '/<string:endpoint>/<pid_value>',
+    view_func=editor_resource
+)
+blueprint_api.add_url_rule(
+    '/<string:endpoint>/<pid_value>/lock',
+    view_func=lock_editor_resource
+)
+blueprint_api.add_url_rule(
+    '/<string:endpoint>/<pid_value>/lock/<string:action>',
+    view_func=lock_editor_resource
+)

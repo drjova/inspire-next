@@ -206,7 +206,7 @@ setup(
             'invenio_collections = invenio_collections:InvenioCollections',
         ],
         'invenio_base.api_blueprints': [
-            'inspirehep_editor = inspirehep.modules.editor:blueprint_api',
+            'inspirehep_editor = inspirehep.modules.editor.views.api:blueprint_api',
         ],
         'invenio_base.apps': [
             'inspire_arxiv = inspirehep.modules.arxiv:InspireArXiv',
@@ -224,7 +224,7 @@ setup(
             'inspire_workflows = inspirehep.modules.workflows:INSPIREWorkflows',
         ],
         'invenio_base.blueprints': [
-            'inspirehep_editor = inspirehep.modules.editor:blueprint',
+            'inspirehep_editor = inspirehep.modules.editor.views.ui:blueprint',
         ],
         'invenio_celery.tasks': [
             'inspire_migrator = inspirehep.modules.migrator.tasks',
