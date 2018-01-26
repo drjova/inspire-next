@@ -38,7 +38,8 @@ from .utils import get_pid_type_from_schema, get_deleted_pid_values, \
 def inspire_recid_minter_update(record_uuid, data):
     """Update record identifiers."""
     # get all ids for this ``object_uuid``
-    pids = PersistentIdentifier.query.filter_by(object_uuid=record_uuid).all()
+    pids = PersistentIdentifier.query.filter_by(
+        object_uuid=record_uuid).all()
     # mint arxiv eprint
     inspire_arxiv_minter(record_uuid, data, pids=pids)
     # mint isbn
@@ -93,7 +94,7 @@ def inspire_arxiv_minter(record_uuid, data, pids=None):
                 str(arxiv_eprint),
                 object_type='rec',
                 object_uuid=record_uuid,
-                status=PIDStatus.REGISTERED
+                status=PIDStatus.RESERVED
              )
         except PIDAlreadyExists:
             current_app.logger.error(
@@ -143,11 +144,52 @@ def inspire_isbn_minter(record_uuid, data, pids=None):
                 str(isbn),
                 object_type='rec',
                 object_uuid=record_uuid,
-                status=PIDStatus.REGISTERED
+                status=PIDStatus.RESERVED
              )
         except PIDAlreadyExists:
             current_app.logger.error(
                 'PID key isbn with value {0} already exists for {1}.'.format(
-                    arxiv_eprint, record_uuid
+                    isbn, record_uuid
                 )
             )
+
+def inspire_texkey_minter(record_uuid, data, pids=None):
+    """Mint texkey.
+    Mints texkey.
+    Note:
+        If the records is updated it will prepend the ``texkey`` to the
+        exising list.
+    Args:
+        record_uuid (str): a record.
+        data (dict): record metadata
+    Returns:
+        PersistentIdentifier: a persistent identifier.
+    """
+    pids = PersistentIdentifier.query.filter_by(object_uuid=record_uuid).all()
+    existing = get_pid_value(pids, 'texkey', default=[''])
+    add = []
+    if pids:
+        # check if they are still valid
+        if not _texkey_is_valid(data, existing):
+            # create a new texkey
+            texkey = _texkey_create(data)
+            add.append(texkey)
+    else:
+        existing = get_value(data, 'texkeys[:]', default=[''])
+        add = add + existing
+        if not _texkey_is_valid(data, existing):
+            # create a new texkey
+            texkey = _texkey_create(data)
+            add = [texkey] + add
+
+    for key in add:
+        PersistentIdentifier.create(
+              'texkey',
+               key,
+              object_type='rec',
+              object_uuid=record_uuid,
+              status=PIDStatus.REGISTERED
+        )
+    pids = PersistentIdentifier.query.filter_by(object_uuid=record_uuid).all()
+    existing = get_pid_value(pids, 'texkey')
+    data['texkeys'] = existing
