@@ -24,17 +24,14 @@
 
 from __future__ import absolute_import, division, print_function
 
-from invenio_pidstore.models import PersistentIdentifier, PIDStatus
+from invenio_pidstore.models import PersistentIdentifier
 from invenio_workflows import workflow_object_class
 
 from inspirehep.modules.records.api import InspireRecord
-from inspirehep.modules.pidstore.minters import inspire_isbn_minter, \
-    inspire_recid_minter_update
+from inspirehep.modules.pidstore.minters import inspire_isbn_minter
 
 
-def test_isbn_minter(app):
-    """Mint isbn."""
-
+def test_isbn_minter(isolated_app):
     data = {
         '$schema': 'http://localhost:5000/schemas/records/hep.json',
         'document_type': [
@@ -54,24 +51,20 @@ def test_isbn_minter(app):
             }
         ],
     }
-    # a workflow object
     obj = workflow_object_class.create(
         data=data,
         id_user=1,
         data_type='hep'
     )
-    # create a record
     record = InspireRecord.create(obj.data, id_=None, skip_files=True)
-    # commit the record
     record.commit()
-    # mint the ``isbn``
+
     inspire_isbn_minter(str(record.id), record)
-    # get all pids
+
     pids = PersistentIdentifier.query.filter_by(
         object_uuid=str(record.id), pid_type='isbn').all()
-    # should be only 2
     assert len(pids) == 2
-    # Update record
+
     data['isbns'] = [
         {
             'value': '11111111111'
@@ -80,21 +73,12 @@ def test_isbn_minter(app):
             'value': '33333333333'
         }
     ]
-    # a workflow object
-    obj = workflow_object_class.create(
-        data=data,
-        id_user=1,
-        data_type='hep'
-    )
-    record.update(obj.data, files_src_records=[obj])
-    # update
-    inspire_recid_minter_update(str(record.id), obj.data)
-    # get all pids
+    inspire_isbn_minter(str(record.id), data, pids=pids)
     pids = PersistentIdentifier.query.filter_by(
-        object_uuid=str(record.id), pid_type='isbn', status=PIDStatus.REGISTERED).all()
-    # should be only 2
-    assert len(pids) == 2
+        object_uuid=str(record.id), pid_type='isbn').all()
     pid_values = [pid.pid_value for pid in pids]
+
+    assert len(pids) == 2
     assert '11111111111' in pid_values
     assert '33333333333' in pid_values
     assert '22222222222' not in pid_values

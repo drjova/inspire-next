@@ -22,9 +22,6 @@
 
 from __future__ import absolute_import, division, print_function
 
-import uuid
-
-from invenio_pidstore.models import PersistentIdentifier
 
 from inspirehep.modules.pidstore.utils import (
     get_endpoint_from_pid_type,
@@ -33,7 +30,8 @@ from inspirehep.modules.pidstore.utils import (
     get_pid_types_from_endpoints,
     get_new_pid_values,
     get_deleted_pid_values,
-    get_pid_type_values
+    _texkey_create,
+    _texkey_is_valid
 )
 
 
@@ -92,24 +90,8 @@ def test_deleted_pid_values():
     assert deleted_values == expected
 
 
-def test_pid_type_values(app):
-    """Test values from pid_type."""
-    rec_uuid = uuid.uuid4()
-    PersistentIdentifier.create(
-        'arxiv',
-        '1901.33333',
-        object_type='rec',
-        object_uuid=rec_uuid,
-    )
-    pids = PersistentIdentifier.query.filter_by(
-        object_uuid=rec_uuid, pid_type='arxiv').all()
-    pid_values = get_pid_type_values(pids, 'arxiv')
-    assert len(pid_values) == 1
-    assert '1901.33333' in pid_values
-
-
-def test_texkey_creation_with_author():
-    """Test texkey creattion with one author."""
+def test_texkey_with_some_authors():
+    """Test texkey creattion with two authors."""
     expected = 'Jones:2001'
     record = {
         'created': '2001-11-01',
@@ -122,7 +104,7 @@ def test_texkey_creation_with_author():
     assert expected == result
 
 
-def test_texkey_creation_with_gt_10_authors():
+def test_texkey_with_gt_10_authors():
     """Test texkey with more than 10 authors."""
     expected = 'Jones:2001'
     record = {
@@ -145,8 +127,8 @@ def test_texkey_creation_with_gt_10_authors():
     assert expected == result
 
 
-def test_texkey_creation_with_gt_10_authors_with_collaboration():
-    """Test texkey with more than 10 authors and collaboration."""
+def test_texkey_with_gt_10_authors_with_collaboration():
+    """Test texkey with more than 10 ``authors`` and ``collaborations``."""
     expected = 'Defenders:2001'
     record = {
         'created': '2001-11-01',
@@ -171,8 +153,8 @@ def test_texkey_creation_with_gt_10_authors_with_collaboration():
     assert expected == result
 
 
-def test_texkey_creation_without_author_with_collaborations():
-    """Test texkey without author and collaborations."""
+def test_texkey_with_only_collaborations():
+    """Test texkey with ``colaborations``."""
     expected = 'Defenders:2001'
     record = {
         'created': '2001-11-01',
@@ -184,9 +166,9 @@ def test_texkey_creation_without_author_with_collaborations():
     assert expected == result
 
 
-def test_texkey_creation_without_author_and_collaborations_with_corporate():
-    """Test texkey without author and collaborations only with corporate."""
-    expected = 'StarkIndustries:2001'
+def test_texkey_with_only_corporate_author():
+    """Test texkey only with ``corporate_author``."""
+    expected = 'IndustriesStark:2001'
     record = {
         'created': '2001-11-01',
         'corporate_author': [
@@ -197,10 +179,10 @@ def test_texkey_creation_without_author_and_collaborations_with_corporate():
     assert expected == result
 
 
-def test_texkey_creation_without_author_and_collaborations_with_corporate_and_proceedings():
-    """Test texkey without author and collaborations only with corporate and proceedings."""
+def test_texkey_with_only_document_type():
+    """Test texkey only with ``document_type``."""
 
-    expected = 'proceedings:2001'
+    expected = 'Proceedings:2001'
     record = {
         'created': '2001-11-01',
         'document_type': [
@@ -211,20 +193,13 @@ def test_texkey_creation_without_author_and_collaborations_with_corporate_and_pr
     assert expected == result
 
 
-def test_texkey_creation_without_author_and_collaborations_and_corporate_author_and_proceedings():
-    """Test texkey without author and collaborations only with corporate and proceedings."""
+def test_texkey_empty():
+    """Test texkey empty record."""
     expected = ':2001'
     record = {
         'created': '2001-11-01',
     }
     result = _texkey_create(record, with_random_part=False)
-    assert expected == result
-
-
-def test_texkey_clearn_author_names():
-    """Test texkey clean name."""
-    expected = 'Haoup'
-    result = _texkey_clean_author('Häöüp')
     assert expected == result
 
 

@@ -24,6 +24,8 @@
 
 from __future__ import absolute_import, division, print_function
 
+import datetime
+
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_workflows import workflow_object_class
 
@@ -31,8 +33,7 @@ from inspirehep.modules.pidstore.minters import inspire_texkey_minter
 from inspirehep.modules.records.api import InspireRecord
 
 
-def test_texkey_minter_new(app):
-    """Test texkey minter in new record."""
+def test_texkey_minter_new(isolated_app):
     data = {
         '$schema': 'http://localhost:5000/schemas/records/hep.json',
         'document_type': [
@@ -57,26 +58,22 @@ def test_texkey_minter_new(app):
             {'full_name': 'Felicia , Hardy'},
         ]
     }
-    # a workflow object
     obj = workflow_object_class.create(
         data=data,
         id_user=1,
         data_type='hep'
     )
-    # create a record
     record = InspireRecord.create(obj.data, id_=None, skip_files=True)
-    # commit the record
     record.commit()
-    # mint the ``texkey``
     inspire_texkey_minter(str(record.id), record)
-    # get all pids
-    pids = PersistentIdentifier.query.filter_by(object_uuid=str(record.id), pid_type='texkey').all()
-    # should be only 1
+    pids = PersistentIdentifier.query.filter_by(
+        object_uuid=str(record.id), pid_type='texkey').all()
+
     assert len(pids) == 1
+    assert 'Jones:2001' in pids[0].pid_value
 
 
-def test_texkey_minter_with_the_same_pid_value(app):
-    """Test texkey minter in new record."""
+def test_texkey_minter_with_the_same_pid_value(isolated_app):
     data = {
         '$schema': 'http://localhost:5000/schemas/records/hep.json',
         'document_type': [
@@ -101,36 +98,30 @@ def test_texkey_minter_with_the_same_pid_value(app):
             {'full_name': 'Felicia , Hardy'},
         ]
     }
-    # a workflow object
     obj = workflow_object_class.create(
         data=data,
         id_user=1,
         data_type='hep'
     )
-    # create a record
     record = InspireRecord.create(obj.data, id_=None, skip_files=True)
-    # commit the record
     record.commit()
-    # mint the ``texkey``
     inspire_texkey_minter(str(record.id), record)
-    # get all pids
-    pids = PersistentIdentifier.query.filter_by(object_uuid=str(record.id), pid_type='texkey').all()
-    # should be only 1
-    assert len(pids) == 1
-    # create a record
-    record = InspireRecord.create(obj.data, id_=None, skip_files=True)
-    # commit the record
-    record.commit()
-    # mint the ``texkey``
-    inspire_texkey_minter(str(record.id), record)
-    # get all pids
-    pids = PersistentIdentifier.query.filter_by(object_uuid=str(record.id), pid_type='texkey').all()
-    # should be only 1
-    assert len(pids) == 1
+    pids = PersistentIdentifier.query.filter_by(
+        object_uuid=str(record.id), pid_type='texkey').all()
 
 
-def test_texkey_minter_with_existing_without_change(app):
-    """Test texkey with existing texkeys."""
+    assert len(pids) == 1
+    assert 'Jones:2001' in pids[0].pid_value
+
+    inspire_texkey_minter(str(record.id), record, pids=pids)
+    pids = PersistentIdentifier.query.filter_by(
+        object_uuid=str(record.id), pid_type='texkey').all()
+
+    assert len(pids) == 1
+    assert 'Jones:2001' in pids[0].pid_value
+
+
+def test_texkey_minter_with_existing(isolated_app):
     data = {
         '$schema': 'http://localhost:5000/schemas/records/hep.json',
         'document_type': [
@@ -158,36 +149,29 @@ def test_texkey_minter_with_existing_without_change(app):
             'Jones:2001xyz'
         ]
     }
-    # a workflow object
     obj = workflow_object_class.create(
         data=data,
         id_user=1,
         data_type='hep'
     )
-    # create a record
     record = InspireRecord.create(obj.data, id_=None, skip_files=True)
-    # commit the record
     record.commit()
-    # mint the ``texkey``
     inspire_texkey_minter(str(record.id), record)
-    # get all pids
-    pids = PersistentIdentifier.query.filter_by(object_uuid=str(record.id), pid_type='texkey').all()
-    # should be only 1
+    pids = PersistentIdentifier.query.filter_by(
+        object_uuid=str(record.id), pid_type='texkey').all()
+
     assert len(pids) == 1
-    # Should have the same value
     assert record['texkeys'][0] == pids[0].pid_value
-    # try to mint again with the  same author
-    inspire_texkey_minter(str(record.id), record)
-    # get all pids
-    pids = PersistentIdentifier.query.filter_by(object_uuid=str(record.id), pid_type='texkey').all()
-    # should be only 1
+
+    inspire_texkey_minter(str(record.id), record, pids=pids)
+    pids = PersistentIdentifier.query.filter_by(
+        object_uuid=str(record.id), pid_type='texkey').all()
+
     assert len(pids) == 1
-    # Should have the same value
     assert record['texkeys'][0] == pids[0].pid_value
 
 
-def test_texkey_minter_with_existing_with_change(app):
-    """Test texkey with existing texkeys with different authors."""
+def test_texkey_minter_with_change(isolated_app):
     data = {
         '$schema': 'http://localhost:5000/schemas/records/hep.json',
         'document_type': [
@@ -215,30 +199,24 @@ def test_texkey_minter_with_existing_with_change(app):
             'Jones:2001azy'
         ]
     }
-    # a workflow object
     obj = workflow_object_class.create(
         data=data,
         id_user=1,
         data_type='hep'
     )
-    # create a record
     record = InspireRecord.create(obj.data, id_=None, skip_files=True)
-    # commit the record
     record.commit()
-    # mint the ``texkey``
     inspire_texkey_minter(str(record.id), record)
-    # get all pids
-    pids = PersistentIdentifier.query.filter_by(object_uuid=str(record.id), pid_type='texkey').all()
-    # should be only 1
-    assert len(pids) == 2
+    pids = PersistentIdentifier.query.filter_by(
+        object_uuid=str(record.id), pid_type='texkey').all()
     keys = str(record['texkeys'])
-    # Rand should be part of the texkeys
+
+    assert len(pids) == 2
     assert 'Rand:2001' in keys
-    # Jones should be part of the texkeys
     assert 'Jones:2001' in keys
 
 
-def test_update_texkey_minter_with_existing_with_change(app):
+def test_update_texkey_minter_with_existing_with_change(isolated_app):
     """Test texkey with existing texkeys with different authors."""
     data = {
         '$schema': 'http://localhost:5000/schemas/records/hep.json',
@@ -267,27 +245,22 @@ def test_update_texkey_minter_with_existing_with_change(app):
             'Jones:2001byz'
         ]
     }
-    # a workflow object
     obj = workflow_object_class.create(
         data=data,
         id_user=1,
         data_type='hep'
     )
-    # create a record
     record = InspireRecord.create(obj.data, id_=None, skip_files=True)
-    # commit the record
     record.commit()
-    # mint the ``texkey``
     inspire_texkey_minter(str(record.id), record)
-    # get all pids
-    pids = PersistentIdentifier.query.filter_by(object_uuid=str(record.id), pid_type='texkey').all()
-    # should be only 1
-    assert len(pids) == 2
+    pids = PersistentIdentifier.query.filter_by(
+        object_uuid=str(record.id), pid_type='texkey').all()
     keys = str(record['texkeys'])
-    # Rand should be part of the texkeys
+
+    assert len(pids) == 2
     assert 'Rand:2001' in keys
-    # Jones should be part of the texkeys
     assert 'Jones:2001' in keys
+
     data['authors'] = [
         {'full_name': 'Francis, Castle'},
         {'full_name': 'Danny, Rand'},
@@ -303,32 +276,21 @@ def test_update_texkey_minter_with_existing_with_change(app):
         {'full_name': 'Felicia, Hardy'},
     ]
 
-    # a workflow object
-    obj = workflow_object_class.create(
-        data=data,
-        id_user=1,
-        data_type='hep'
-    )
-    # update record
     record.clear()
-    record.update(obj.data)
+    record.update(data)
     record.commit()
-    # mint the ``texkey``
-    inspire_texkey_minter(str(record.id), record)
-    # get all pids
-    pids = PersistentIdentifier.query.filter_by(object_uuid=str(record.id), pid_type='texkey').all()
-    # should be only 3
-    assert len(pids) == 3
+    inspire_texkey_minter(str(record.id), record, pids=pids)
+    pids = PersistentIdentifier.query.filter_by(
+        object_uuid=str(record.id), pid_type='texkey').all()
     keys = str(record['texkeys'])
-    # Castle should be part of the texkeys
+
+    assert len(pids) == 3
     assert 'Castle:2001' in keys
-    # Rand should be part of the texkeys
     assert 'Rand:2001' in keys
-    # Jones should be part of the texkeys
     assert 'Jones:2001' in keys
 
 
-def test_update_texkey_minter_with_existing_without_change(app):
+def test_update_texkey_minter_with_existing_without_change(isolated_app):
     """Test texkey with existing texkeys with different authors."""
     data = {
         '$schema': 'http://localhost:5000/schemas/records/hep.json',
@@ -357,27 +319,22 @@ def test_update_texkey_minter_with_existing_without_change(app):
             'Jones:2001eyz'
         ]
     }
-    # a workflow object
     obj = workflow_object_class.create(
         data=data,
         id_user=1,
         data_type='hep'
     )
-    # create a record
     record = InspireRecord.create(obj.data, id_=None, skip_files=True)
-    # commit the record
     record.commit()
-    # mint the ``texkey``
     inspire_texkey_minter(str(record.id), record)
-    # get all pids
-    pids = PersistentIdentifier.query.filter_by(object_uuid=str(record.id), pid_type='texkey').all()
-    # should be only 1
-    assert len(pids) == 2
+    pids = PersistentIdentifier.query.filter_by(
+        object_uuid=str(record.id), pid_type='texkey').all()
     keys = str(record['texkeys'])
-    # Rand should be part of the texkeys
+
+    assert len(pids) == 2
     assert 'Rand:2001' in keys
-    # Jones should be part of the texkeys
     assert 'Jones:2001' in keys
+
     data['authors'] = [
         {'full_name': 'Danny, Rand'},
         {'full_name': 'Jessica, Jones'},
@@ -391,24 +348,158 @@ def test_update_texkey_minter_with_existing_without_change(app):
         {'full_name': 'Kyle, Richmond'},
         {'full_name': 'Felicia, Hardy'},
     ]
-    # a workflow object
+    record.clear()
+    record.update(data)
+    record.commit()
+    inspire_texkey_minter(str(record.id), record, pids=pids)
+    pids = PersistentIdentifier.query.filter_by(
+        object_uuid=str(record.id), pid_type='texkey').all()
+    keys = str(record['texkeys'])
+
+    assert len(pids) == 2
+    assert 'Rand:2001' in keys
+    assert 'Jones:2001' in keys
+
+
+def test_texkey_minter_with_collaboaration(isolated_app):
+    """Test texkey minter in new record."""
+    data = {
+        '$schema': 'http://localhost:5000/schemas/records/hep.json',
+        'document_type': [
+            'article',
+        ],
+        'preprint_date': '2001-11-01',
+        'titles': [
+            {'title': 'merged'},
+        ],
+        '_collections': ['Literature'],
+        'collaborations': [
+            {'value': 'Defenders'}
+        ]
+    }
     obj = workflow_object_class.create(
         data=data,
         id_user=1,
         data_type='hep'
     )
-    # update record
-    record.clear()
-    record.update(obj.data)
+    record = InspireRecord.create(obj.data, id_=None, skip_files=True)
     record.commit()
-    # mint the ``texkey``
     inspire_texkey_minter(str(record.id), record)
-    # get all pids
-    pids = PersistentIdentifier.query.filter_by(object_uuid=str(record.id), pid_type='texkey').all()
-    # should be only 2
-    assert len(pids) == 2
-    keys = str(record['texkeys'])
-    # Rand should be part of the texkeys
-    assert 'Rand:2001' in keys
-    # Jones should be part of the texkeys
-    assert 'Jones:2001' in keys
+    pids = PersistentIdentifier.query.filter_by(
+        object_uuid=str(record.id), pid_type='texkey').all()
+
+    assert len(pids) == 1
+    assert 'Defenders:2001' in pids[0].pid_value
+
+
+def test_texkey_with_corporate_author(isolated_app):
+    data = {
+        '$schema': 'http://localhost:5000/schemas/records/hep.json',
+        'document_type': [
+            'article',
+        ],
+        'preprint_date': '2001-11-01',
+        'titles': [
+            {'title': 'merged'},
+        ],
+        '_collections': ['Literature'],
+        'corporate_author': [
+            'Defenders',
+        ]
+    }
+    obj = workflow_object_class.create(
+        data=data,
+        id_user=1,
+        data_type='hep'
+    )
+    record = InspireRecord.create(obj.data, id_=None, skip_files=True)
+    record.commit()
+    inspire_texkey_minter(str(record.id), record)
+    pids = PersistentIdentifier.query.filter_by(
+        object_uuid=str(record.id), pid_type='texkey').all()
+
+    assert len(pids) == 1
+    assert 'Defenders:2001' in pids[0].pid_value
+
+
+def test_texkey_minter_with_proceedings(isolated_app):
+    data = {
+        '$schema': 'http://localhost:5000/schemas/records/hep.json',
+        'document_type': [
+            'article',
+        ],
+        'preprint_date': '2001-11-01',
+        'titles': [
+            {'title': 'merged'},
+        ],
+        '_collections': ['Literature'],
+        'document_type': ['proceedings']
+    }
+
+    obj = workflow_object_class.create(
+        data=data,
+        id_user=1,
+        data_type='hep'
+    )
+    record = InspireRecord.create(obj.data, id_=None, skip_files=True)
+    record.commit()
+    inspire_texkey_minter(str(record.id), record)
+    pids = PersistentIdentifier.query.filter_by(
+        object_uuid=str(record.id), pid_type='texkey').all()
+
+    assert len(pids) == 1
+    assert 'proceedings:2001' in pids[0].pid_value
+
+
+def test_texkey_minter_empty(isolated_app):
+    data = {
+        '$schema': 'http://localhost:5000/schemas/records/hep.json',
+        'document_type': [
+            'article',
+        ],
+        'preprint_date': '2001-11-01',
+        'titles': [
+            {'title': 'merged'},
+        ],
+        '_collections': ['Literature'],
+    }
+    obj = workflow_object_class.create(
+        data=data,
+        id_user=1,
+        data_type='hep'
+    )
+    record = InspireRecord.create(obj.data, id_=None, skip_files=True)
+    record.commit()
+    """
+    with pytest.raises(TexkeyMinterError):
+        inspire_texkey_minter(str(record.id), record)
+    """
+
+
+def test_texkey_minter_current_date_fallback(isolated_app):
+    data = {
+        '$schema': 'http://localhost:5000/schemas/records/hep.json',
+        'document_type': [
+            'article',
+        ],
+        'titles': [
+            {'title': 'merged'},
+        ],
+        '_collections': ['Literature'],
+        'document_type': ['proceedings']
+    }
+
+    obj = workflow_object_class.create(
+        data=data,
+        id_user=1,
+        data_type='hep'
+    )
+    record = InspireRecord.create(obj.data, id_=None, skip_files=True)
+    record.commit()
+    inspire_texkey_minter(str(record.id), record)
+    pids = PersistentIdentifier.query.filter_by(
+        object_uuid=str(record.id), pid_type='texkey').all()
+    now = datetime.datetime.now()
+
+    assert len(pids) == 1
+    assert 'proceedings:{}'.format(now.year) in pids[0].pid_value

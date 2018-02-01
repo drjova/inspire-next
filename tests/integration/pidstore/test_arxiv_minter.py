@@ -28,13 +28,10 @@ from invenio_pidstore.models import PersistentIdentifier
 from invenio_workflows import workflow_object_class
 
 from inspirehep.modules.records.api import InspireRecord
-from inspirehep.modules.pidstore.minters import inspire_arxiv_minter, \
-    inspire_recid_minter_update
+from inspirehep.modules.pidstore.minters import inspire_arxiv_minter
 
 
-def test_arxiv_minter(app):
-    """Mint arxiv eprints."""
-
+def test_arxiv_minter(isolated_app):
     data = {
         '$schema': 'http://localhost:5000/schemas/records/hep.json',
         'document_type': [
@@ -60,45 +57,29 @@ def test_arxiv_minter(app):
             }
         ]
     }
-    # a workflow object
     obj = workflow_object_class.create(
         data=data,
         id_user=1,
         data_type='hep'
     )
-    # create a record
     record = InspireRecord.create(obj.data, id_=None, skip_files=True)
-    # commit the record
     record.commit()
-    # mint the ``arxiv``
     inspire_arxiv_minter(str(record.id), record)
-    # get all pids
     pids = PersistentIdentifier.query.filter_by(
         object_uuid=str(record.id), pid_type='arxiv').all()
-    # should be only 2
+
     assert len(pids) == 2
 
-    # Update record
     data['arxiv_eprints'].append({
         'categories': [
             'astro-ph.HE'
         ],
         'value': '1901.33333'
     })
-
-    # a workflow object
-    obj = workflow_object_class.create(
-        data=data,
-        id_user=1,
-        data_type='hep'
-    )
-    record.update(obj.data, files_src_records=[obj])
-    # update
-    inspire_recid_minter_update(str(record.id), obj.data)
-    # commit the record
+    record.update(data)
+    inspire_arxiv_minter(str(record.id), obj.data, pids=pids)
     record.commit()
-    # get all pids
     pids = PersistentIdentifier.query.filter_by(
         object_uuid=str(record.id), pid_type='arxiv').all()
-    # should be only 3
+
     assert len(pids) == 3

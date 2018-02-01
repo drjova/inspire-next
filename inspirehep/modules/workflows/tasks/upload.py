@@ -26,7 +26,8 @@ from __future__ import absolute_import, division, print_function
 
 from invenio_db import db
 
-from inspirehep.modules.pidstore.minters import inspire_recid_minter
+from inspirehep.modules.pidstore.minters import inspire_recid_minter, \
+    inspire_recid_minter_update
 from inspirehep.modules.pidstore.utils import get_pid_type_from_schema
 from inspirehep.modules.records.api import InspireRecord
 from inspirehep.modules.workflows.utils import with_debug_logging

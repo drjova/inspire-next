@@ -25,13 +25,16 @@
 from __future__ import absolute_import, division, print_function
 
 from flask import current_app
-from six import iteritems
+from six import iteritems, PY3
 from six.moves.urllib.parse import urlsplit
 
+import re
+from datetime import date
+from itertools import chain
+from random import choice
 from string import ascii_lowercase
-from unidecode import unidecode
-import unicodedata
 
+from beard.utils.names import normalize_name
 from inspire_utils.date import earliest_date, PartialDate
 from inspire_utils.record import get_value
 from inspire_utils.helpers import force_list
@@ -84,6 +87,7 @@ def get_pid_type_from_schema(schema):
 
 def get_new_pid_values(current, updated):
     """Get the new pids from the updated record.
+
     Compares the current ``pid.values`` with the updated ones.
 
     Args:
@@ -123,50 +127,17 @@ def get_pid_type_values(pids, pid_type):
     return [pid.pid_value for pid in pids if pid.pid_type == pid_type]
 
 
-def _texkey_clean_author(value):
-    """Sanitize a value.
+def get_pid_value(pids, pid_type):
+    """Return the pids values for a give ``pid_type``.
 
     Args:
-        value (str): a value to sanitize.
+        pids list(PersistentIdentifier): a list of ``pids``.
+        pid_type (str): a persistent identifier type.
 
     Returns:
-        str: the sanitized value.
-
-    Examples:
-        >>> value = 'Häöüp'
-        >>> _texkey_clean_author(value)
-        'Haoup'
+        list(str): a list of pids.
     """
-
-    def _asciify(string):
-        """Transliterate a string to ASCII."""
-        if not PY3 and not isinstance(string, unicode):
-            string = unicode(string, 'utf8', errors='ignore')
-
-        string = unidecode(unicodedata.normalize('NFKD', string))
-        string = string.encode('ascii', 'ignore')
-        string = string.decode('utf8')
-
-        return string
-
-    def _remove_bibtex_invalid_chars(value):
-        return re.sub(
-            r'[^-A-Za-z0-9.:/^_;&*<>?|!$+]',
-            '',
-            value
-        )
-
-    def _contains_a_letter(value):
-        return re.search(
-            r'[A-Za-z]',
-            value
-        )
-
-    value = _remove_bibtex_invalid_chars(_asciify(value))
-    if len(value) == 0 or not _contains_a_letter(value):
-        value = ''
-
-    return value
+    return [pid.pid_value for pid in pids if pid.pid_type == pid_type]
 
 
 def _texkey_create(data, with_random_part=True):
@@ -192,7 +163,7 @@ def _texkey_create(data, with_random_part=True):
         with_random_part (bool, optional): include the random part.
 
     Returns:
-        str: the generated ``texkey``
+        str: the generated ``texkey``.
 
     Examples:
         >>> record = {
@@ -205,7 +176,6 @@ def _texkey_create(data, with_random_part=True):
         >>> texkey = _texkey_create(record)
         'Jones:2001'
     """
-    # generate the author part
     author_part = ''
     if 1 <= len(data.get('authors', [])) < 10:
         author_part = data['authors'][0]['full_name']
@@ -218,10 +188,9 @@ def _texkey_create(data, with_random_part=True):
     elif data.get('authors'):
         author_part = data['authors'][0]['full_name']
 
-    # clean the name
-    author_part = _texkey_clean_author(author_part.split(',').pop())
+    author_part = normalize_name(author_part.split(',').pop())
+    author_part = author_part.title().replace(' ', '')
 
-    # generate the date path
     date_paths = [
         'preprint_date',
         'thesis_info.date',
@@ -231,7 +200,6 @@ def _texkey_create(data, with_random_part=True):
         'imprints.date',
     ]
     date_part = None
-    # get the date values
     dates = list(
         chain.from_iterable(
             [force_list(get_value(data, path)) for path in date_paths]
@@ -239,25 +207,21 @@ def _texkey_create(data, with_random_part=True):
     )
 
     if dates:
-        # generate the erliest date
         date_part = earliest_date(
             map(str, dates)
         )
-    # if has ``date_part`` get the year
+
     if date_part:
         date_part = PartialDate.loads(str(date_part)).year
     else:
-        # else try to get the created year or get the current one
         date_part = PartialDate.loads(
             data.get('created', str(date.today().year))).year
 
-    # generate random part (optional)
     random_part = ''
     if with_random_part:
         random_part = ''.join(
             choice(ascii_lowercase) for _ in range(3)
         )
-    # return the texkey
     return '{}:{}{}'.format(author_part, date_part, random_part)
 
 
@@ -274,10 +238,6 @@ def _texkey_is_valid(data, existing):
         bool: if the ``texkey`` is valid.
     """
     if existing:
-        # get previous ``texkeys``
-        previous_texkeys = existing[0]
-        # generate a ``texkey`` without the random part
         texkey = _texkey_create(data, with_random_part=False)
-        # check if they much
-        return texkey in previous_texkeys
+        return any(texkey in key for key in existing)
     return False
