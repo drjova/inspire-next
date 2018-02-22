@@ -84,12 +84,9 @@ from inspirehep.modules.workflows.tasks.matching import (
 )
 from inspirehep.modules.workflows.tasks.upload import store_record, set_schema
 from inspirehep.modules.workflows.tasks.submission import (
-    close_ticket,
-    create_ticket,
     filter_keywords,
     prepare_keywords,
     remove_references,
-    reply_ticket,
     send_robotupload,
     wait_webcoll,
 )
@@ -101,6 +98,8 @@ from inspirehep.modules.literaturesuggest.tasks import (
     curation_ticket_context,
 )
 
+from inspirehep.modules.rt.tasks import close_ticket, create_ticket, \
+    reply_ticket
 
 NOTIFY_SUBMISSION = [
     create_ticket(
@@ -202,13 +201,16 @@ NOTIFY_ACCEPTED = [
 
 
 NOTIFY_CURATOR_IF_CORE = [
-    IF(
-        curation_ticket_needed,
-        create_ticket(
-            template='literaturesuggest/tickets/curation_core.html',
-            queue='HEP_curation',
-            context_factory=curation_ticket_context,
-            ticket_id_key='curation_ticket_id',
+    IF_NOT(
+        is_marked('is-update'),
+        IF(
+            curation_ticket_needed,
+            create_ticket(
+                template='literaturesuggest/tickets/curation_core.html',
+                queue='HEP_curation',
+                context_factory=curation_ticket_context,
+                ticket_id_key='curation_ticket_id',
+            ),
         ),
     ),
 ]
