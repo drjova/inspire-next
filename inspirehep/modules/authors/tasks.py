@@ -33,7 +33,6 @@ from invenio_accounts.models import User
 from invenio_oauthclient.models import UserIdentity
 
 from inspire_dojson.utils import strip_empty_values
-from inspire_schemas.api import validate
 from inspirehep.modules.forms.utils import filter_empty_elements
 from inspirehep.modules.workflows.utils import with_debug_logging
 from inspirehep.utils.schema import ensure_valid_schema
@@ -111,8 +110,6 @@ def formdata_to_model(obj, formdata):
 
     data = strip_empty_values(data)
 
-    validate(data, 'authors')
-
     return data
 
 
@@ -141,7 +138,7 @@ def update_ticket_context(user, obj):
         obj.data.get("name").get("preferred_name")
     )
     record_url = os.path.join(current_app.config["AUTHORS_UPDATE_BASE_URL"], "record",
-                              str(obj.data.get("control_number", "")))
+                              str(obj.data["control_number"]))
     return dict(
         email=user.email,
         url=record_url,

@@ -31,14 +31,10 @@ from inspirehep.modules.workflows.tasks.actions import (
     in_production_mode,
     is_marked,
     is_record_accepted,
+    validate_record,
 )
 
-from inspirehep.modules.workflows.tasks.submission import (
-    close_ticket,
-    create_ticket,
-    reply_ticket,
-    send_robotupload
-)
+from inspirehep.modules.workflows.tasks.submission import send_robotupload
 from inspirehep.modules.workflows.tasks.upload import store_record, set_schema
 
 from inspirehep.modules.authors.tasks import (
@@ -49,6 +45,8 @@ from inspirehep.modules.authors.tasks import (
     update_ticket_context,
 )
 
+from inspirehep.modules.rt.tasks import close_ticket, create_ticket, \
+    reply_ticket
 
 SEND_TO_LEGACY = [
     send_robotupload(
@@ -126,6 +124,7 @@ class Author(object):
     workflow = [
         # Make sure schema is set for proper indexing in Holding Pen
         set_schema,
+        validate_record('authors'),
         IF_ELSE(
             is_marked('is-update'),
             SEND_UPDATE_NOTIFICATION,
