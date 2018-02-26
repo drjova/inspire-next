@@ -20,14 +20,15 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
-"""Tasks related to user actions."""
-
 from __future__ import absolute_import, division, print_function
 
+import sys
 import re
 from functools import wraps
+from six import reraise
 
 from flask import current_app
+from jsonschema.exceptions import ValidationError
 from sqlalchemy import (
     JSON,
     String,
@@ -41,25 +42,25 @@ from invenio_db import db
 from invenio_workflows import ObjectStatus
 from invenio_workflows.errors import WorkflowsError
 from invenio_records.models import RecordMetadata
-
 from inspire_schemas.builders import LiteratureBuilder
 from inspire_schemas.utils import validate
 from inspire_utils.record import get_value
 from inspirehep.modules.records.json_ref_loader import replace_refs
 from inspirehep.modules.workflows.tasks.refextract import (
     extract_references_from_pdf,
-    extract_references_from_text,
     extract_references_from_raw_refs,
+    extract_references_from_text,
 )
 from inspirehep.modules.workflows.utils import (
     download_file_to_workflow,
     get_document_in_workflow,
     log_workflows_action,
+    resolve_validation_callback_url,
+    validation_errors,
     with_debug_logging,
 )
 from inspirehep.utils.normalizers import normalize_journal_title
 from inspirehep.utils.url import is_pdf_link
-
 
 RE_ALPHANUMERIC = re.compile('\W+', re.UNICODE)
 
@@ -245,7 +246,16 @@ def validate_record(schema):
     @with_debug_logging
     @wraps(validate_record)
     def _validate_record(obj, eng):
-        validate(obj.data, schema)
+        try:
+            validate(obj.data, schema)
+        except ValidationError:
+            obj.extra_data['validation_errors'] = \
+                validation_errors(obj.data, schema)
+            obj.extra_data['callback_url'] = \
+                resolve_validation_callback_url()
+            obj.save()
+            db.session.commit()
+            reraise(*sys.exc_info())
 
     _validate_record.__doc__ = 'Validate the workflow record against the "%s" schema.' % schema
     return _validate_record
