@@ -33,3 +33,47 @@ class DownloadError(WorkflowsError):
 class MergeError(WorkflowsError):
 
     """Error representing a failed merge in a workflow."""
+
+
+class CallbackError(WorkflowsError):
+    """Callback exception."""
+
+    code = 400
+    description = 'Workflow callback error.'
+
+
+class CallbackMalformedError(CallbackError):
+    """Malformed request exception."""
+
+    error_code = 'MALFORMED'
+
+    def __init__(self, key, **kwargs):
+        """Initialize exception."""
+        super(CallbackMalformedError, self).__init__(**kwargs)
+        self.description = 'Malformed workflow, "{}" key was not found.'.format(
+            key)
+
+
+class CallbackWorkflowNotFoundError(CallbackError):
+    """Workflow not found exception."""
+
+    code = 404
+    error_code = 'WORKFLOW_NOT_FOUND'
+
+    def __init__(self, workflow_id, **kwargs):
+        """Initialize exception."""
+        super(CallbackWorkflowNotFoundError, self).__init__(**kwargs)
+        self.description = 'The workflow with id "{}" was not found.'.format(
+            workflow_id)
+
+
+class CallbackValidationError(CallbackError):
+    """Validation error exception."""
+
+    error_code = 'VALIDATION_ERROR'
+    description = 'Validation error.'
+
+    def __init__(self, workflow_data, **kwargs):
+        """Initialize exception."""
+        super(CallbackValidationError, self).__init__(**kwargs)
+        self.workflow = workflow_data
