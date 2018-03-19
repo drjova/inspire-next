@@ -41,6 +41,7 @@ from invenio_pidstore.models import PersistentIdentifier
 from invenio_records_files.api import Record
 from invenio_db import db
 
+from inspirehep.modules.pidstore.utils import get_pid_types_from_endpoints
 from inspirehep.utils.record_getter import (
     RecordGetterError,
     get_es_record_by_uuid
@@ -132,11 +133,14 @@ class InspireRecord(Record):
             other(InspireRecord): The record that self(record) is going to be
                 redirected.
         """
+        numeric_pid_types = get_pid_types_from_endpoints()
         pids_deleted = PersistentIdentifier.query.filter(
-            PersistentIdentifier.object_uuid == self.id
+            PersistentIdentifier.object_uuid == self.id,
+            PersistentIdentifier.pid_type.in_(numeric_pid_types)
         ).all()
         pid_merged = PersistentIdentifier.query.filter(
-            PersistentIdentifier.object_uuid == other.id
+            PersistentIdentifier.object_uuid == other.id,
+            PersistentIdentifier.pid_type.in_(numeric_pid_types)
         ).one()
         with db.session.begin_nested():
             for pid in pids_deleted:

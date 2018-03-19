@@ -185,6 +185,7 @@ $hp_table_bg: #fff;
       -moz-transition: all .5s;
       transition: all .5s;
       background-color: $clouds;
+      color: $grey;
       border: none;
       padding: 7px;
       margin-top: -8px;
@@ -226,11 +227,11 @@ $hp_table_bg: #fff;
     }
   }
 
-  .clearfix:after { 
-    content: "."; 
-    visibility: hidden; 
-    display: block; 
-    height: 0; 
+  .clearfix:after {
+    content: ".";
+    visibility: hidden;
+    display: block;
+    height: 0;
     clear: both;
   }
 

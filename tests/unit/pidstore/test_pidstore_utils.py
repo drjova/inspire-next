@@ -22,11 +22,16 @@
 
 from __future__ import absolute_import, division, print_function
 
+
 from inspirehep.modules.pidstore.utils import (
     get_endpoint_from_pid_type,
     get_pid_type_from_endpoint,
     get_pid_type_from_schema,
     get_pid_types_from_endpoints,
+    get_new_pid_values,
+    get_deleted_pid_values,
+    _texkey_create,
+    _texkey_is_valid
 )
 
 
@@ -61,3 +66,162 @@ def test_get_pid_from_schema_supports_relative_urls():
 def test_get_pid_types_from_endpoint(app):
     pid_types = set(('lit', 'con', 'exp', 'jou', 'aut', 'job', 'ins'))
     assert pid_types.issubset(get_pid_types_from_endpoints())
+
+
+def test_new_pid_values():
+    """Test new values from record."""
+    expected = ['1901.33333']
+    current = ['1701.11111', '1801.22222']
+    update = ['1701.11111', '1801.22222', '1901.33333']
+
+    new_values = get_new_pid_values(current, update)
+
+    assert new_values == expected
+
+
+def test_deleted_pid_values():
+    """Test deleted values from record."""
+    expected = ['1901.33333']
+    update = ['1701.11111', '1801.22222']
+    current = ['1701.11111', '1801.22222', '1901.33333']
+
+    deleted_values = get_deleted_pid_values(current, update)
+
+    assert deleted_values == expected
+
+
+def test_texkey_with_some_authors():
+    """Test texkey creattion with two authors."""
+    expected = 'Jones:2001'
+    record = {
+        'created': '2001-11-01',
+        'authors': [
+            {'full_name': 'Jessica, Jones'},
+            {'full_name': 'Francis, Castle'},
+        ]
+    }
+    result = _texkey_create(record, with_random_part=False)
+    assert expected == result
+
+
+def test_texkey_with_gt_10_authors():
+    """Test texkey with more than 10 authors."""
+    expected = 'Jones:2001'
+    record = {
+        'created': '2001-11-01',
+        'authors': [
+            {'full_name': 'Jessica, Jones'},
+            {'full_name': 'Francis, Castle'},
+            {'full_name': 'Luke, Cage'},
+            {'full_name': 'Danny, Rand'},
+            {'full_name': 'Matt, Murdock'},
+            {'full_name': 'Bruce , Banner'},
+            {'full_name': 'Stephen , Strange'},
+            {'full_name': 'Scott , Lang'},
+            {'full_name': 'Wade , Wilson'},
+            {'full_name': 'Kyle , Richmond'},
+            {'full_name': 'Felicia , Hardy'},
+        ]
+    }
+    result = _texkey_create(record, with_random_part=False)
+    assert expected == result
+
+
+def test_texkey_with_gt_10_authors_with_collaboration():
+    """Test texkey with more than 10 ``authors`` and ``collaborations``."""
+    expected = 'Defenders:2001'
+    record = {
+        'created': '2001-11-01',
+        'authors': [
+            {'full_name': 'Jessica, Jones'},
+            {'full_name': 'Francis, Castle'},
+            {'full_name': 'Luke, Cage'},
+            {'full_name': 'Danny, Rand'},
+            {'full_name': 'Matt, Murdock'},
+            {'full_name': 'Bruce , Banner'},
+            {'full_name': 'Stephen , Strange'},
+            {'full_name': 'Scott , Lang'},
+            {'full_name': 'Wade , Wilson'},
+            {'full_name': 'Kyle , Richmond'},
+            {'full_name': 'Felicia , Hardy'},
+        ],
+        'collaborations': [
+            {'value': 'Defenders'}
+        ]
+    }
+    result = _texkey_create(record, with_random_part=False)
+    assert expected == result
+
+
+def test_texkey_with_only_collaborations():
+    """Test texkey with ``colaborations``."""
+    expected = 'Defenders:2001'
+    record = {
+        'created': '2001-11-01',
+        'collaborations': [
+            {'value': 'Defenders'}
+        ]
+    }
+    result = _texkey_create(record, with_random_part=False)
+    assert expected == result
+
+
+def test_texkey_with_only_corporate_author():
+    """Test texkey only with ``corporate_author``."""
+    expected = 'IndustriesStark:2001'
+    record = {
+        'created': '2001-11-01',
+        'corporate_author': [
+            'Stark Industries'
+        ]
+    }
+    result = _texkey_create(record, with_random_part=False)
+    assert expected == result
+
+
+def test_texkey_with_only_document_type():
+    """Test texkey only with ``document_type``."""
+
+    expected = 'Proceedings:2001'
+    record = {
+        'created': '2001-11-01',
+        'document_type': [
+            'proceedings'
+        ],
+    }
+    result = _texkey_create(record, with_random_part=False)
+    assert expected == result
+
+
+def test_texkey_empty():
+    """Test texkey empty record."""
+    expected = ':2001'
+    record = {
+        'created': '2001-11-01',
+    }
+    result = _texkey_create(record, with_random_part=False)
+    assert expected == result
+
+
+def test_texkey_validation():
+    """Test texkey validation."""
+    expected = True
+    record = {
+        'created': '2001-11-01',
+        'authors': [
+            {'full_name': 'Jessica, Jones'},
+            {'full_name': 'Francis, Castle'},
+            {'full_name': 'Luke, Cage'},
+            {'full_name': 'Danny, Rand'},
+            {'full_name': 'Matt, Murdock'},
+            {'full_name': 'Bruce , Banner'},
+            {'full_name': 'Stephen , Strange'},
+            {'full_name': 'Scott , Lang'},
+            {'full_name': 'Wade , Wilson'},
+            {'full_name': 'Kyle , Richmond'},
+            {'full_name': 'Felicia , Hardy'},
+        ]
+    }
+    existing = ['Jones:2001xyz']
+    result = _texkey_is_valid(record, existing)
+    assert expected == result

@@ -26,7 +26,8 @@ from __future__ import absolute_import, division, print_function
 
 from invenio_db import db
 
-from inspirehep.modules.pidstore.minters import inspire_recid_minter
+from inspirehep.modules.pidstore.minters import inspire_recid_minter, \
+    inspire_recid_minter_update
 from inspirehep.modules.pidstore.utils import get_pid_type_from_schema
 from inspirehep.modules.records.api import InspireRecord
 from inspirehep.modules.workflows.utils import with_debug_logging
@@ -56,6 +57,7 @@ def store_record(obj, eng):
         obj.data['control_number'] = record['control_number']
         record.clear()
         record.update(obj.data, files_src_records=[obj])
+        inspire_recid_minter_update(str(record.id), record)
 
     else:
         # Skip the files to avoid issues in case the record has already pid
