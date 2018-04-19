@@ -24,8 +24,8 @@
 
 from __future__ import absolute_import, division, print_function
 
+from mock import patch, mock_open
 import json
-import mock
 import pytest
 
 from invenio_workflows import (
@@ -34,29 +34,38 @@ from invenio_workflows import (
     start,
 )
 
+from factories.db.invenio_records import TestRecord
+
 
 @pytest.fixture
 def enable_merge_on_update(workflow_app):
-    with mock.patch.dict(workflow_app.config, {'FEATURE_FLAG_ENABLE_MERGER': True}):
+    with patch.dict(workflow_app.config, {'FEATURE_FLAG_ENABLE_MERGER': True}):
         yield
 
 
-def test_merge_with_disabled_merge_on_update_feature_flag(workflow_app, record_to_merge):
+@patch(
+    'inspirehep.modules.records.api.fsopen',
+    mock_open(read_data='dummy body'),
+)
+def test_merge_with_disabled_merge_on_update_feature_flag(workflow_app):
+    factory = TestRecord.create_from_file(
+        __name__, 'merge_record_with_documents.json')
+
     record_update = {
-        '$schema': 'http://localhost:5000/schemas/records/hep.json',
         '_collections': ['Literature'],
         'document_type': ['article'],
         'titles': [
             {'title': 'Jessica Jones'},
             {'title': 'Luke Cage'},
             {'title': 'Frank Castle'},
-        ],
-        'dois': [
-            {
-                'value': '10.1007/978-3-319-15001-7'
-            }
-        ],
+        ]
     }
+    dois = factory.record.json.get('dois')
+    schema = factory.record.json.get('$schema')
+    record_update.update({
+        '$schema': schema,
+        'dois': dois,
+    })
 
     eng_uuid = start('article', [record_update])
 
@@ -68,22 +77,29 @@ def test_merge_with_disabled_merge_on_update_feature_flag(workflow_app, record_t
     assert obj.extra_data.get('merged') is True
 
 
-def test_merge_without_conflicts(workflow_app, enable_merge_on_update, record_to_merge):
+@patch(
+    'inspirehep.modules.records.api.fsopen',
+    mock_open(read_data='dummy body'),
+)
+def test_merge_without_conflicts(workflow_app, enable_merge_on_update):
+    factory = TestRecord.create_from_file(
+        __name__, 'merge_record_with_documents.json')
+
     record_update = {
-        '$schema': 'http://localhost:5000/schemas/records/hep.json',
         '_collections': ['Literature'],
         'document_type': ['article'],
         'titles': [
             {'title': 'Jessica Jones'},
             {'title': 'Luke Cage'},
             {'title': 'Frank Castle'},
-        ],
-        'dois': [
-            {
-                'value': '10.1007/978-3-319-15001-7'
-            }
-        ],
+        ]
     }
+    dois = factory.record.json.get('dois')
+    schema = factory.record.json.get('$schema')
+    record_update.update({
+        '$schema': schema,
+        'dois': dois,
+    })
 
     eng_uuid = start('article', [record_update])
 
@@ -99,7 +115,14 @@ def test_merge_without_conflicts(workflow_app, enable_merge_on_update, record_to
     assert obj.extra_data.get('merged') is True
 
 
-def test_merge_with_conflicts(workflow_app, enable_merge_on_update, record_to_merge):
+@patch(
+    'inspirehep.modules.records.api.fsopen',
+    mock_open(read_data='dummy body'),
+)
+def test_merge_with_conflicts(workflow_app, enable_merge_on_update):
+    factory = TestRecord.create_from_file(
+        __name__, 'merge_record_with_documents.json')
+
     record_update = {
         '$schema': 'http://schemas.stark-industries.com/schemas/records/avengers.json',
         '_collections': ['Literature'],
@@ -108,21 +131,13 @@ def test_merge_with_conflicts(workflow_app, enable_merge_on_update, record_to_me
             {'title': 'Jessica Jones'},
             {'title': 'Luke Cage'},
             {'title': 'Frank Castle'},
-        ],
-        'authors': [
-            {'full_name': 'Maldacena, J.'},
-            {'full_name': 'Strominger, A.'},
-        ],
-        'abstracts': [
-            {'source': 'arxiv', 'value': 'A basic abstract.'}
-        ],
-        'report_numbers': [{'value': 'DESY-17-036'}],
-        'dois': [
-            {
-                'value': '10.1007/978-3-319-15001-7'
-            }
-        ],
+        ]
     }
+
+    dois = factory.record.json.get('dois')
+    record_update.update({
+        'dois': dois,
+    })
 
     eng_uuid = start('article', [record_update])
 
@@ -137,30 +152,29 @@ def test_merge_with_conflicts(workflow_app, enable_merge_on_update, record_to_me
     assert obj.extra_data.get('is-update') is True
 
 
-def test_merge_without_conflicts_callback_url(workflow_app, enable_merge_on_update, record_to_merge):
+@patch(
+    'inspirehep.modules.records.api.fsopen',
+    mock_open(read_data='dummy body'),
+)
+def test_merge_without_conflicts_callback_url(workflow_app, enable_merge_on_update):
+    factory = TestRecord.create_from_file(
+        __name__, 'merge_record_with_documents.json')
+
     record_update = {
-        '$schema': 'http://localhost:5000/schemas/records/hep.json',
         '_collections': ['Literature'],
         'document_type': ['article'],
         'titles': [
             {'title': 'Jessica Jones'},
             {'title': 'Luke Cage'},
             {'title': 'Frank Castle'},
-        ],
-        'authors': [
-            {'full_name': 'Maldacena, J.'},
-            {'full_name': 'Strominger, A.'},
-        ],
-        'abstracts': [
-            {'source': 'arxiv', 'value': 'A basic abstract.'}
-        ],
-        'report_numbers': [{'value': 'DESY-17-036'}],
-        'dois': [
-            {
-                'value': '10.1007/978-3-319-15001-7'
-            }
-        ],
+        ]
     }
+    dois = factory.record.json.get('dois')
+    schema = factory.record.json.get('$schema')
+    record_update.update({
+        '$schema': schema,
+        'dois': dois,
+    })
 
     eng_uuid = start('article', [record_update])
 
@@ -190,30 +204,29 @@ def test_merge_without_conflicts_callback_url(workflow_app, enable_merge_on_upda
     assert response.status_code == 400
 
 
-def test_merge_with_conflicts_callback_url(workflow_app, enable_merge_on_update, record_to_merge):
+@patch(
+    'inspirehep.modules.records.api.fsopen',
+    mock_open(read_data='dummy body'),
+)
+def test_merge_with_conflicts_callback_url(workflow_app, enable_merge_on_update):
+    factory = TestRecord.create_from_file(
+        __name__, 'merge_record_with_documents.json')
+
     record_update = {
-        '$schema': 'http://schemas.stark-industries.com/schemas/avengers.json',
+        '$schema': 'http://schemas.stark-industries.com/schemas/records/avengers.json',
         '_collections': ['Literature'],
         'document_type': ['article'],
         'titles': [
             {'title': 'Jessica Jones'},
             {'title': 'Luke Cage'},
             {'title': 'Frank Castle'},
-        ],
-        'authors': [
-            {'full_name': 'Maldacena, J.'},
-            {'full_name': 'Strominger, A.'},
-        ],
-        'abstracts': [
-            {'source': 'arxiv', 'value': 'A basic abstract.'}
-        ],
-        'report_numbers': [{'value': 'DESY-17-036'}],
-        'dois': [
-            {
-                'value': '10.1007/978-3-319-15001-7'
-            }
-        ],
+        ]
     }
+
+    dois = factory.record.json.get('dois')
+    record_update.update({
+        'dois': dois,
+    })
 
     eng_uuid = start('article', [record_update])
 
@@ -254,30 +267,29 @@ def test_merge_with_conflicts_callback_url(workflow_app, enable_merge_on_update,
     assert obj.status == ObjectStatus.HALTED
 
 
-def test_merge_with_conflicts_callback_url_and_resolve(workflow_app, enable_merge_on_update, record_to_merge):
+@patch(
+    'inspirehep.modules.records.api.fsopen',
+    mock_open(read_data='dummy body'),
+)
+def test_merge_with_conflicts_callback_url_and_resolve(workflow_app, enable_merge_on_update):
+    factory = TestRecord.create_from_file(
+        __name__, 'merge_record_with_documents.json')
+
     record_update = {
-        '$schema': 'http://schemas.stark-industries.com/schemas/avengers.json',
+        '$schema': 'http://schemas.stark-industries.com/schemas/records/avengers.json',
         '_collections': ['Literature'],
         'document_type': ['article'],
         'titles': [
             {'title': 'Jessica Jones'},
             {'title': 'Luke Cage'},
             {'title': 'Frank Castle'},
-        ],
-        'authors': [
-            {'full_name': 'Maldacena, J.'},
-            {'full_name': 'Strominger, A.'},
-        ],
-        'abstracts': [
-            {'source': 'arxiv', 'value': 'A basic abstract.'}
-        ],
-        'report_numbers': [{'value': 'DESY-17-036'}],
-        'dois': [
-            {
-                'value': '10.1007/978-3-319-15001-7'
-            }
-        ],
+        ]
     }
+
+    dois = factory.record.json.get('dois')
+    record_update.update({
+        'dois': dois,
+    })
 
     eng_uuid = start('article', [record_update])
 
@@ -294,7 +306,7 @@ def test_merge_with_conflicts_callback_url_and_resolve(workflow_app, enable_merg
     assert obj.extra_data.get('is-update') is True
 
     # resolve conflicts
-    obj.data['$schema'] = record_to_merge['$schema']
+    obj.data['$schema'] = factory.record.json.get('$schema')
     del obj.extra_data['conflicts']
 
     payload = {
@@ -323,30 +335,29 @@ def test_merge_with_conflicts_callback_url_and_resolve(workflow_app, enable_merg
     assert obj.extra_data.get('merged') is True
 
 
-def test_merge_callback_url_with_malformed_workflow(workflow_app, enable_merge_on_update, record_to_merge):
+@patch(
+    'inspirehep.modules.records.api.fsopen',
+    mock_open(read_data='dummy body'),
+)
+def test_merge_callback_url_with_malformed_workflow(workflow_app, enable_merge_on_update):
+    factory = TestRecord.create_from_file(
+        __name__, 'merge_record_with_documents.json')
+
     record_update = {
-        '$schema': 'http://schemas.stark-industries.com/schemas/avengers.json',
+        '$schema': 'http://schemas.stark-industries.com/schemas/records/avengers.json',
         '_collections': ['Literature'],
         'document_type': ['article'],
         'titles': [
             {'title': 'Jessica Jones'},
             {'title': 'Luke Cage'},
             {'title': 'Frank Castle'},
-        ],
-        'authors': [
-            {'full_name': 'Maldacena, J.'},
-            {'full_name': 'Strominger, A.'},
-        ],
-        'abstracts': [
-            {'source': 'arxiv', 'value': 'A basic abstract.'}
-        ],
-        'report_numbers': [{'value': 'DESY-17-036'}],
-        'dois': [
-            {
-                'value': '10.1007/978-3-319-15001-7'
-            }
-        ],
+        ]
     }
+
+    dois = factory.record.json.get('dois')
+    record_update.update({
+        'dois': dois,
+    })
 
     eng_uuid = start('article', [record_update])
 

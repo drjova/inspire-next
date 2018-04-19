@@ -29,9 +29,11 @@ import pytest
 
 from functools import partial
 
+import sqlalchemy as sa
 from click.testing import CliRunner
 from flask import current_app
 from flask.cli import ScriptInfo
+from sqlalchemy_utils.functions import create_database, database_exists
 
 from invenio_db import db
 from invenio_search import current_search_client as es
