@@ -148,11 +148,11 @@ def test_save_roots(workflow_app):
 
     save_roots(obj, None)
 
-    arxiv_rec = read_wf_record_source(str(head.id), 'arxiv')
+    arxiv_rec = read_wf_record_source(head.id, 'arxiv')
     assert arxiv_rec.json == {'version': 'updated'}
 
-    pub_rec = read_wf_record_source(str(head.id), 'publisher')
+    pub_rec = read_wf_record_source(head.id, 'publisher')
     assert pub_rec.json == {'version': 'updated'}
 
-    assert not read_wf_record_source(str(update.id), 'arxiv')
-    assert not read_wf_record_source(str(update.id), 'publisher')
+    assert not read_wf_record_source(update.id, 'arxiv')
+    assert not read_wf_record_source(update.id, 'publisher')

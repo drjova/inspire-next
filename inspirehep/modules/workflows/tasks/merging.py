@@ -33,8 +33,10 @@ from inspirehep.modules.records.api import InspireRecord
 from inspirehep.modules.workflows.models import WorkflowsRecordSources
 from inspirehep.modules.workflows.utils import (
     get_resolve_merge_conflicts_callback_url,
+    read_wf_record_source,
     with_debug_logging
 )
+
 from inspirehep.utils.record import get_source
 
 
@@ -93,7 +95,7 @@ def merge_articles(obj, eng):
     head = InspireRecord.get_record(head_uuid)
     update = obj.data
     update_source = get_source(update).lower()
-    head_root = WorkflowsRecordSources.query.filter_by(record_id=head_uuid, source=update_source).first() or {}
+    head_root = read_wf_record_source(record_uuid=head.id, source=update_source) or {}
 
     merged, conflicts = merge(
         head=head.dumps(),

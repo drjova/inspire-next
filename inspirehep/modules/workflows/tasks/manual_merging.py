@@ -122,7 +122,6 @@ def save_roots(obj, eng):
                 )
             elif head_sources[update_root.source].updated < update_root.updated:
                 head_roots.remove(head_sources[update_root.source])
-                db.session.delete(head_sources[update_root.source])
                 head_roots.append(
                     WorkflowsRecordSources(
                         source=update_root.source,
@@ -131,7 +130,6 @@ def save_roots(obj, eng):
                     )
                 )
             db.session.delete(update_root)
-            db.session.commit()
         return head_roots
 
     head_uuid, update_uuid = obj.extra_data['head_uuid'], obj.extra_data['update_uuid']
@@ -140,7 +138,9 @@ def save_roots(obj, eng):
     head_roots = read_all_wf_record_sources(head_uuid)
     update_roots = read_all_wf_record_sources(update_uuid)
 
-    db.session.bulk_save_objects(_merge_roots(head_uuid, head_roots, update_roots))
+    updated_head_rooots = _merge_roots(head_uuid, head_roots, update_roots)
+    for head_root in updated_head_rooots:
+        db.session.merge(head_root)
     db.session.commit()
 
 

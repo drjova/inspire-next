@@ -102,7 +102,7 @@ def test_store_root_new_record(isolated_app_with_commit):
 
         store_root(obj, None)
 
-        root_entry = read_wf_record_source(str(head_uuid), 'arxiv')
+        root_entry = read_wf_record_source(head_uuid, 'arxiv')
 
         assert root_entry.json == root
 
@@ -140,6 +140,6 @@ def test_store_root_update_record(isolated_app_with_commit):
 
         store_root(obj, None)
 
-        root_entry = read_wf_record_source(str(head_uuid), 'arxiv')
+        root_entry = read_wf_record_source(head_uuid, 'arxiv')
 
         assert root_entry.json == update_root
