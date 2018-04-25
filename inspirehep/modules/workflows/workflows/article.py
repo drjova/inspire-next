@@ -92,9 +92,9 @@ from inspirehep.modules.workflows.tasks.merging import (
     merge_articles,
 )
 from inspirehep.modules.workflows.tasks.upload import (
+    set_schema,
     store_record,
     store_root,
-    set_schema,
 )
 from inspirehep.modules.workflows.tasks.submission import (
     close_ticket,

@@ -24,8 +24,8 @@
 
 from __future__ import absolute_import, division, print_function
 
-from copy import deepcopy
 import sys
+from copy import deepcopy
 from functools import wraps
 from six import reraise
 
@@ -497,6 +497,9 @@ def preserve_root(obj, eng):
     Returns:
         None
     """
+    if not current_app.config.get('FEATURE_FLAG_ENABLE_MERGER', False):
+        return
+
     obj.extra_data['merger_root'] = deepcopy(obj.data)
     obj.save()
 

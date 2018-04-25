@@ -73,6 +73,12 @@ def store_record(obj, eng):
 @with_debug_logging
 def store_root(obj, eng):
     """Insert or update the current record head's root into the ``WorkflowsRecordSources`` table."""
+    if not current_app.config.get('FEATURE_FLAG_ENABLE_MERGER', False):
+        obj.log.info(
+            'skipping storing source root, feature flag ``FEATURE_FLAG_ENABLE_MERGER`` is disabled.'
+        )
+        return
+
     root = obj.extra_data['merger_root']
     head_uuid = obj.extra_data['head_uuid']
     source = get_source(root).lower()
