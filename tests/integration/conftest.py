@@ -114,6 +114,58 @@ def isolated_app(app):
     db.session.rollback()
 
 
+@pytest.fixture(scope='function')
+def isolated_app_with_commit(app):
+    """Flask application with database isolation and function scope.
+
+    When using this fixture no changes will be persisted to the database
+    because at the end of each test the database is rolled back. This is
+    achieved by using a nested transaction. For examples on how to use it,
+    please see tests/integration/test_db_isolation.py.
+
+    Note:
+        A neater solution seems to be the one suggested in https://goo.gl/31EKXq.
+        This version allows for ``db.session.commit()``, unlike ``isolated_app``.
+        User story #INSPIR-425 is concerned with merging and improving both isolated apps.
+
+    """
+    db.session.begin_nested()
+    yield app
+    db.session.rollback()
+
+
+@pytest.fixture(scope='module')
+def small_app():
+    """Flask application with few records and module scope.
+
+    .. deprecated:: 2017-09-18
+       Use ``app`` instead.
+    """
+    app = create_app()
+    app.config.update({'DEBUG': True})
+
+    with app.app_context():
+        # Celery task imports must be local, otherwise their
+        # configuration would use the default pickle serializer.
+        from inspirehep.modules.migrator.tasks import migrate
+
+        db.drop_all()
+        db.create_all()
+
+        _es = app.extensions['invenio-search']
+        list(_es.delete(ignore=[404]))
+        list(_es.create(ignore=[400]))
+
+        init_all_storage_paths()
+        init_users_and_permissions()
+        init_collections()
+
+        migrate('./inspirehep/demosite/data/demo-records-small.xml', wait_for_results=True)
+        es.indices.refresh('records-hep')
+
+        yield app
+
+
 @pytest.fixture()
 def app_client(app):
     """Flask test client for the application.
