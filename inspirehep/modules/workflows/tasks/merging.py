@@ -36,6 +36,7 @@ from inspirehep.modules.workflows.utils import (
     read_wf_record_source,
     with_debug_logging
 )
+from inspirehep.utils.record import get_source
 
 from inspirehep.utils.record import get_source
 
