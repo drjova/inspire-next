@@ -38,8 +38,6 @@ from inspirehep.modules.workflows.utils import (
 )
 from inspirehep.utils.record import get_source
 
-from inspirehep.utils.record import get_source
-
 
 def get_head_source(head_uuid):
     """Return the right source for the record having uuid=``uuid``.
