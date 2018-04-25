@@ -93,12 +93,12 @@ def halt_for_merge_approval(obj, eng):
 
 @with_debug_logging
 def save_roots(obj, eng):
-    """Save the head and update roots in the db.
+    """Save and update the head roots and delete the update roots from the db.
 
-    Merge the head and update roots in according to their sources and link
-    them to the merged record.
-    If both head and update have a root with a given source, than the older
-    one is removed and the newer one is assigned tot the head.
+    If both head and update have a root from a given source, then the older one is
+    removed and the newer one is assigned tot the head. Otherwise, assign the update
+    roots from sources that are missing among the head roots to the head.
+    i.e. it is an union-like operation.
 
     Args:
         obj: a workflow object.
@@ -111,27 +111,26 @@ def save_roots(obj, eng):
     def _merge_roots(new_uuid, head_roots, update_roots):
         """Return the new roots to link to head."""
         head_sources = {h.source: h for h in head_roots}
-        for u in update_roots:
-            if u.source not in head_sources.keys():
+        for update_root in update_roots:
+            if update_root.source not in head_sources:
                 head_roots.append(
                     WorkflowsRecordSources(
-                        source=u.source,
+                        source=update_root.source,
                         record_id=new_uuid,
-                        json=u.json
+                        json=update_root.json
                     )
                 )
-            else:
-                if head_sources[u.source].updated < u.updated:
-                    head_roots.remove(head_sources[u.source])
-                    db.session.delete(head_sources[u.source])
-                    head_roots.append(
-                        WorkflowsRecordSources(
-                            source=u.source,
-                            record_id=new_uuid,
-                            json=u.json
-                        )
+            elif head_sources[update_root.source].updated < update_root.updated:
+                head_roots.remove(head_sources[update_root.source])
+                db.session.delete(head_sources[update_root.source])
+                head_roots.append(
+                    WorkflowsRecordSources(
+                        source=update_root.source,
+                        record_id=new_uuid,
+                        json=update_root.json
                     )
-            db.session.delete(u)
+                )
+            db.session.delete(update_root)
             db.session.commit()
         return head_roots
 
