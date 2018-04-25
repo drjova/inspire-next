@@ -35,6 +35,7 @@ from inspirehep.modules.workflows.utils import (
     get_resolve_merge_conflicts_callback_url,
     with_debug_logging
 )
+from inspirehep.utils.record import get_source
 
 
 def get_head_source(head_uuid):
@@ -75,9 +76,7 @@ def merge_articles(obj, eng):
     contains the endpoint which resolves the merge conflicts.
 
     Note:
-        For the time being the ``root`` will be ignored, and we'll rely only
-        on the ``head``, hence it is a rootless implementation. Also when
-        the feature flag ``FEATURE_FLAG_ENABLE_MERGER`` is ``False`` it
+        When the feature flag ``FEATURE_FLAG_ENABLE_MERGER`` is ``False`` it
         will skip the merge.
 
     """
@@ -92,12 +91,13 @@ def merge_articles(obj, eng):
     obj.extra_data['head_uuid'] = str(head_uuid)
 
     head = InspireRecord.get_record(head_uuid)
-    root = {}
     update = obj.data
+    update_source = get_source(update).lower()
+    head_root = WorkflowsRecordSources.query.filter_by(record_id=head_uuid, source=update_source).first() or {}
 
     merged, conflicts = merge(
         head=head.dumps(),
-        root=root,
+        root=head_root,
         update=update
     )
 

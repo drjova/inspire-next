@@ -24,6 +24,7 @@
 
 from __future__ import absolute_import, division, print_function
 
+from copy import deepcopy
 import sys
 from functools import wraps
 from six import reraise
@@ -483,6 +484,21 @@ def error_workflow(message):
         % message
     )
     return _error_workflow
+
+
+@with_debug_logging
+def preserve_root(obj, eng):
+    """Save the current workflow payload to be used as root for the merger.
+
+    Args:
+        obj: a workflow object.
+        eng: a workflow engine.
+
+    Returns:
+        None
+    """
+    obj.extra_data['merger_root'] = deepcopy(obj.data)
+    obj.save()
 
 
 @with_debug_logging
