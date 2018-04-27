@@ -285,6 +285,17 @@ def is_submission(obj, eng):
     return get_method(obj.data) == 'submitter'
 
 
+def is_feature_flag_enabled(key):
+    """Check if the given feature flag is enabled."""
+
+    @with_debug_logging
+    @wraps(mark)
+    def wrapper(obj, eng):
+        return current_app.config.get(key, False)
+
+    return wrapper
+
+
 def validate_record(schema):
     @with_debug_logging
     @wraps(validate_record)

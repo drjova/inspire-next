@@ -50,6 +50,7 @@ from inspirehep.modules.workflows.tasks.actions import (
     is_record_accepted,
     is_record_relevant,
     is_submission,
+    is_feature_flag_enabled,
     mark,
     normalize_journal_titles,
     populate_journal_coverage,
@@ -235,7 +236,20 @@ POSTENHANCE_RECORD = [
 
 
 SEND_TO_LEGACY = [
-    send_robotupload(mode='replace'),
+    IF_ELSE(
+        is_marked('is-update'),
+        [
+            IF(
+                is_feature_flag_enabled('FEATURE_FLAG_ENABLE_UPDATE_TO_LEGACY'),
+                [
+                    send_robotupload(mode='replace'),
+                ]
+            )
+        ],
+        [
+            send_robotupload(mode='replace'),
+        ]
+    )
 ]
 
 
