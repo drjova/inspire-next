@@ -95,12 +95,13 @@ def merge_articles(obj, eng):
     head = InspireRecord.get_record(head_uuid)
     update = obj.data
     update_source = get_source(update).lower()
-    head_root = read_wf_record_source(record_uuid=head.id, source=update_source) or {}
+    head_root = read_wf_record_source(record_uuid=head.id, source=update_source)
+    head_root = head_root.json if head_root else {}
 
     merged, conflicts = merge(
         head=head.dumps(),
         root=head_root,
-        update=update
+        update=update,
     )
 
     obj.data = merged

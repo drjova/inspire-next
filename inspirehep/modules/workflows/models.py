@@ -29,7 +29,7 @@ from datetime import datetime
 import enum
 
 from sqlalchemy.dialects import postgresql
-from sqlalchemy_utils.types import JSONType, UUIDType
+from sqlalchemy_utils.types import UUIDType
 
 from invenio_db import db
 

@@ -34,27 +34,63 @@ from invenio_workflows import (
     start,
 )
 
+from inspirehep.modules.workflows.utils import insert_wf_record_source, read_wf_record_source
+
 from factories.db.invenio_records import TestRecordMetadata
 
-RECORD_WITHOUT_CONFLICTS = {
-    'titles': [
-        {
-            'title': 'A title.'
-        },
-    ],
-    'document_type': ['article'],
-    '_collections': ['Literature']
-}
 
-RECORD_WITH_CONFLICTS = {
-    '$schema': 'http://schemas.stark-industries.com/schemas/records/avengers.json',
+RECORD_WITHOUT_CONFLICTS = {
+    '$schema': 'https://labs.inspirehep.net/schemas/records/hep.json',
     'titles': [
         {
-            'title': 'A title.'
+            'title': 'Update without conflicts title.'
         },
     ],
     'document_type': ['article'],
     '_collections': ['Literature'],
+    'acquisition_source': {'source': 'arXiv'},
+}
+
+RECORD_WITH_CONFLICTS = {
+    '$schema': 'https://labs.inspirehep.net/schemas/records/hep.json',
+    'titles': [
+        {
+            'title': 'Update with conflicts title.'
+        },
+    ],
+    'document_type': ['article'],
+    '_collections': ['Literature'],
+    'acquisition_source': {'source': 'arXiv'},
+    'collaborations': [
+        {
+            'record':
+                {
+                    '$ref': 'http://newlabs.inspirehep.net/api/literature/684121'
+                },
+            'value': 'ALICE'
+        },
+    ],
+}
+
+ARXIV_ROOT = {
+    '$schema': 'https://labs.inspirehep.net/schemas/records/hep.json',
+    'titles': [
+        {
+            'title': 'Root title.'
+        },
+    ],
+    'document_type': ['article'],
+    '_collections': ['Literature'],
+    'acquisition_source': {'source': 'arXiv'},
+    'collaborations': [
+        {
+            'record':
+                {
+                    '$ref': 'http://newlabs.inspirehep.net/api/literature/684121'
+                },
+            'value': 'ALICE'
+        },
+    ],
 }
 
 
@@ -71,255 +107,299 @@ def disable_file_upload(workflow_app):
 
 
 def test_merge_with_disabled_merge_on_update_feature_flag(workflow_app, disable_file_upload):
-    factory = TestRecordMetadata.create_from_file(
-        __name__, 'record_for_merging.json')
+    with patch.dict(workflow_app.config, {'FEATURE_FLAG_ENABLE_MERGER': False}):
+        factory = TestRecordMetadata.create_from_file(
+            __name__, 'merge_record_arxiv.json')
 
-    record_update = RECORD_WITHOUT_CONFLICTS
-    record_update.update({
-        '$schema': factory.record_metadata.json.get('$schema'),
-        'dois': factory.record_metadata.json.get('dois'),
-    })
+        record_update = RECORD_WITHOUT_CONFLICTS
+        record_update.update({
+            'arxiv_eprints': factory.record_metadata.json.get('arxiv_eprints')
+        })
 
-    eng_uuid = start('article', [record_update])
+        eng_uuid = start('article', [record_update])
 
-    eng = WorkflowEngine.from_uuid(eng_uuid)
-    obj = eng.objects[0]
+        eng = WorkflowEngine.from_uuid(eng_uuid)
+        obj = eng.objects[0]
 
-    assert obj.extra_data.get('callback_url') is None
-    assert obj.extra_data.get('conflicts') is None
-    assert obj.extra_data.get('merged') is True
+        assert obj.status == ObjectStatus.COMPLETED
 
+        assert obj.extra_data.get('callback_url') is None
+        assert obj.extra_data.get('conflicts') is None
+        assert obj.extra_data.get('merged') is True
+        assert obj.extra_data.get('merger_root') is None
 
-def test_merge_without_conflicts(workflow_app, enable_merge_on_update, disable_file_upload):
-    factory = TestRecordMetadata.create_from_file(
-        __name__, 'record_for_merging.json')
-
-    record_update = RECORD_WITHOUT_CONFLICTS
-    record_update.update({
-        '$schema': factory.record_metadata.json.get('$schema'),
-        'dois': factory.record_metadata.json.get('dois'),
-    })
-
-    eng_uuid = start('article', [record_update])
-
-    eng = WorkflowEngine.from_uuid(eng_uuid)
-    obj = eng.objects[0]
-
-    assert obj.status == ObjectStatus.COMPLETED
-    assert obj.extra_data.get('callback_url') is None
-    assert obj.extra_data.get('conflicts') is None
-
-    assert obj.extra_data.get('approved') is True
-    assert obj.extra_data.get('is-update') is True
-    assert obj.extra_data.get('merged') is True
+        updated_root = read_wf_record_source(factory.record_metadata.id, 'arxiv')
+        assert updated_root is None
 
 
-def test_merge_with_conflicts(workflow_app, enable_merge_on_update, disable_file_upload):
-    factory = TestRecordMetadata.create_from_file(
-        __name__, 'record_for_merging.json')
+def test_merge_with_conflicts_rootful(workflow_app, enable_merge_on_update, disable_file_upload):
+    with patch('inspire_json_merger.config.ArxivOnArxivOperations.conflict_filters', ['acquisition_source.source']):
+        factory = TestRecordMetadata.create_from_file(
+            __name__, 'merge_record_arxiv.json')
 
-    record_update = RECORD_WITH_CONFLICTS
-    record_update.update({
-        'dois': factory.record_metadata.json.get('dois')
-    })
+        record_update = RECORD_WITH_CONFLICTS
+        record_update.update({
+            'arxiv_eprints': factory.record_metadata.json.get('arxiv_eprints')
+        })
 
-    eng_uuid = start('article', [record_update])
+        # By default the root is {}.
 
-    eng = WorkflowEngine.from_uuid(eng_uuid)
-    obj = eng.objects[0]
+        eng_uuid = start('article', [record_update])
 
-    conflicts = obj.extra_data.get('conflicts')
+        eng = WorkflowEngine.from_uuid(eng_uuid)
+        obj = eng.objects[0]
 
-    assert obj.status == ObjectStatus.HALTED
-    assert len(conflicts) == 1
-    assert obj.extra_data.get('callback_url') is not None
-    assert obj.extra_data.get('is-update') is True
+        conflicts = obj.extra_data.get('conflicts')
+
+        assert obj.status == ObjectStatus.HALTED
+        assert len(conflicts) == 1
+
+        assert obj.extra_data.get('callback_url') is not None
+        assert obj.extra_data.get('is-update') is True
+        assert obj.extra_data['merger_root'] == record_update
+
+
+def test_merge_without_conflicts_rootful(workflow_app, enable_merge_on_update, disable_file_upload):
+    with patch('inspire_json_merger.config.ArxivOnArxivOperations.conflict_filters', ['acquisition_source.source']):
+        factory = TestRecordMetadata.create_from_file(
+            __name__, 'merge_record_arxiv.json')
+
+        record_update = RECORD_WITH_CONFLICTS
+        record_update.update({
+            'arxiv_eprints': factory.record_metadata.json.get('arxiv_eprints')
+        })
+        
+        ARXIV_ROOT.update({
+            'arxiv_eprints': factory.record_metadata.json.get('arxiv_eprints')
+        })
+
+        insert_wf_record_source(json=ARXIV_ROOT, record_uuid=factory.record_metadata.id, source='arxiv')
+
+        eng_uuid = start('article', [record_update])
+
+        eng = WorkflowEngine.from_uuid(eng_uuid)
+        obj = eng.objects[0]
+
+        conflicts = obj.extra_data.get('conflicts')
+
+        assert obj.status == ObjectStatus.COMPLETED
+        assert not conflicts
+
+        assert obj.extra_data.get('callback_url') is None
+        assert obj.extra_data.get('is-update') is True
+
+        updated_root = read_wf_record_source(factory.record_metadata.id, 'arxiv')
+        assert updated_root.json == record_update
 
 
 def test_merge_without_conflicts_callback_url(workflow_app, enable_merge_on_update, disable_file_upload):
-    factory = TestRecordMetadata.create_from_file(
-        __name__, 'record_for_merging.json')
+    with patch('inspire_json_merger.config.ArxivOnArxivOperations.conflict_filters', ['acquisition_source.source']):
+        factory = TestRecordMetadata.create_from_file(
+            __name__, 'merge_record_arxiv.json')
 
-    record_update = RECORD_WITHOUT_CONFLICTS
-    record_update.update({
-        '$schema': factory.record_metadata.json.get('$schema'),
-        'dois': factory.record_metadata.json.get('dois'),
-    })
+        record_update = RECORD_WITHOUT_CONFLICTS
+        record_update.update({
+            'arxiv_eprints': factory.record_metadata.json.get('arxiv_eprints')
+        })
 
-    eng_uuid = start('article', [record_update])
+        eng_uuid = start('article', [record_update])
 
-    eng = WorkflowEngine.from_uuid(eng_uuid)
-    obj = eng.objects[0]
+        eng = WorkflowEngine.from_uuid(eng_uuid)
+        obj = eng.objects[0]
 
-    conflicts = obj.extra_data.get('conflicts')
+        conflicts = obj.extra_data.get('conflicts')
 
-    url = 'http://localhost:5000/callback/workflows/resolve_merge_conflicts'
+        url = 'http://localhost:5000/callback/workflows/resolve_merge_conflicts'
 
-    assert conflicts is None
-    assert obj.extra_data.get('is-update') is True
+        assert obj.status == ObjectStatus.COMPLETED
+        assert conflicts is None
+        assert obj.extra_data.get('is-update') is True
 
-    payload = {
-        'id': obj.id,
-        'metadata': obj.data,
-        '_extra_data': obj.extra_data
-    }
+        updated_root = read_wf_record_source(factory.record_metadata.id, 'arxiv')
+        assert updated_root.json == record_update
 
-    with workflow_app.test_client() as client:
-        response = client.put(
-            url,
-            data=json.dumps(payload),
-            content_type='application/json',
-        )
+        payload = {
+            'id': obj.id,
+            'metadata': obj.data,
+            '_extra_data': obj.extra_data
+        }
 
-    assert response.status_code == 400
+        with workflow_app.test_client() as client:
+            response = client.put(
+                url,
+                data=json.dumps(payload),
+                content_type='application/json',
+            )
+
+        assert response.status_code == 400
 
 
 def test_merge_with_conflicts_callback_url(workflow_app, enable_merge_on_update, disable_file_upload):
-    factory = TestRecordMetadata.create_from_file(
-        __name__, 'record_for_merging.json')
+    with patch('inspire_json_merger.config.ArxivOnArxivOperations.conflict_filters', ['acquisition_source.source']):
+        factory = TestRecordMetadata.create_from_file(
+            __name__, 'merge_record_arxiv.json')
 
-    record_update = RECORD_WITH_CONFLICTS
-    record_update.update({
-        'dois': factory.record_metadata.json.get('dois'),
-    })
+        record_update = RECORD_WITH_CONFLICTS
+        record_update.update({
+            'arxiv_eprints': factory.record_metadata.json.get('arxiv_eprints')
+        })
 
-    eng_uuid = start('article', [record_update])
+        eng_uuid = start('article', [record_update])
 
-    eng = WorkflowEngine.from_uuid(eng_uuid)
-    obj = eng.objects[0]
+        eng = WorkflowEngine.from_uuid(eng_uuid)
+        obj = eng.objects[0]
 
-    conflicts = obj.extra_data.get('conflicts')
+        conflicts = obj.extra_data.get('conflicts')
 
-    expected_url = 'http://localhost:5000/callback/workflows/resolve_merge_conflicts'
+        expected_url = 'http://localhost:5000/callback/workflows/resolve_merge_conflicts'
 
-    assert obj.status == ObjectStatus.HALTED
-    assert expected_url == obj.extra_data.get('callback_url')
-    assert len(conflicts) == 1
-    assert obj.extra_data.get('is-update') is True
+        assert obj.status == ObjectStatus.HALTED
+        assert expected_url == obj.extra_data.get('callback_url')
+        assert len(conflicts) == 1
 
-    payload = {
-        'id': obj.id,
-        'metadata': obj.data,
-        '_extra_data': obj.extra_data
-    }
+        assert obj.extra_data.get('is-update') is True
+        assert obj.extra_data['merger_root'] == record_update
 
-    with workflow_app.test_client() as client:
-        response = client.put(
-            obj.extra_data.get('callback_url'),
-            data=json.dumps(payload),
-            content_type='application/json',
-        )
+        payload = {
+            'id': obj.id,
+            'metadata': obj.data,
+            '_extra_data': obj.extra_data
+        }
 
-    data = json.loads(response.get_data())
-    expected_message = 'Workflow {} has been saved with conflicts.'.format(obj.id)
+        with workflow_app.test_client() as client:
+            response = client.put(
+                obj.extra_data.get('callback_url'),
+                data=json.dumps(payload),
+                content_type='application/json',
+            )
 
-    assert response.status_code == 200
-    assert expected_message == data['message']
+        data = json.loads(response.get_data())
+        expected_message = 'Workflow {} has been saved with conflicts.'.format(obj.id)
 
-    eng = WorkflowEngine.from_uuid(eng_uuid)
-    obj = eng.objects[0]
+        assert response.status_code == 200
+        assert expected_message == data['message']
 
-    assert obj.status == ObjectStatus.HALTED
+        eng = WorkflowEngine.from_uuid(eng_uuid)
+        obj = eng.objects[0]
+
+        assert obj.status == ObjectStatus.HALTED
+
+        updated_root = read_wf_record_source(factory.record_metadata.id, 'arxiv')
+        assert updated_root is None
 
 
 def test_merge_with_conflicts_callback_url_and_resolve(workflow_app, enable_merge_on_update, disable_file_upload):
-    factory = TestRecordMetadata.create_from_file(
-        __name__, 'record_for_merging.json')
+    with patch('inspire_json_merger.config.ArxivOnArxivOperations.conflict_filters', ['acquisition_source.source']):
+        factory = TestRecordMetadata.create_from_file(
+            __name__, 'merge_record_arxiv.json')
 
-    record_update = RECORD_WITH_CONFLICTS
-    record_update.update({
-        'dois': factory.record_metadata.json.get('dois'),
-    })
+        record_update = RECORD_WITH_CONFLICTS
+        record_update.update({
+            'arxiv_eprints': factory.record_metadata.json.get('arxiv_eprints')
+        })
 
-    eng_uuid = start('article', [record_update])
+        eng_uuid = start('article', [record_update])
 
-    eng = WorkflowEngine.from_uuid(eng_uuid)
-    obj = eng.objects[0]
+        eng = WorkflowEngine.from_uuid(eng_uuid)
+        obj = eng.objects[0]
 
-    conflicts = obj.extra_data.get('conflicts')
+        conflicts = obj.extra_data.get('conflicts')
 
-    expected_url = 'http://localhost:5000/callback/workflows/resolve_merge_conflicts'
+        expected_url = 'http://localhost:5000/callback/workflows/resolve_merge_conflicts'
 
-    assert obj.status == ObjectStatus.HALTED
-    assert expected_url == obj.extra_data.get('callback_url')
-    assert len(conflicts) == 1
-    assert obj.extra_data.get('is-update') is True
+        assert obj.status == ObjectStatus.HALTED
+        assert expected_url == obj.extra_data.get('callback_url')
+        assert len(conflicts) == 1
 
-    # resolve conflicts
-    obj.data['$schema'] = factory.record_metadata.json.get('$schema')
-    del obj.extra_data['conflicts']
+        assert obj.extra_data.get('is-update') is True
+        assert obj.extra_data['merger_root'] == record_update
 
-    payload = {
-        'id': obj.id,
-        'metadata': obj.data,
-        '_extra_data': obj.extra_data
-    }
+        # resolve conflicts
+        obj.data['collaborations'] = factory.record_metadata.json.get('collaborations')
+        del obj.extra_data['conflicts']
 
-    with workflow_app.test_client() as client:
-        response = client.put(
-            obj.extra_data.get('callback_url'),
-            data=json.dumps(payload),
-            content_type='application/json',
-        )
-    assert response.status_code == 200
+        payload = {
+            'id': obj.id,
+            'metadata': obj.data,
+            '_extra_data': obj.extra_data
+        }
 
-    eng = WorkflowEngine.from_uuid(eng_uuid)
-    obj = eng.objects[0]
+        with workflow_app.test_client() as client:
+            response = client.put(
+                obj.extra_data.get('callback_url'),
+                data=json.dumps(payload),
+                content_type='application/json',
+            )
+        assert response.status_code == 200
 
-    conflicts = obj.extra_data.get('conflicts')
+        eng = WorkflowEngine.from_uuid(eng_uuid)
+        obj = eng.objects[0]
 
-    assert obj.status == ObjectStatus.COMPLETED
-    assert conflicts is None
-    assert obj.extra_data.get('approved') is True
-    assert obj.extra_data.get('is-update') is True
-    assert obj.extra_data.get('merged') is True
+        conflicts = obj.extra_data.get('conflicts')
+
+        assert obj.status == ObjectStatus.COMPLETED
+        assert conflicts is None
+
+        assert obj.extra_data.get('approved') is True
+        assert obj.extra_data.get('is-update') is True
+        assert obj.extra_data.get('merged') is True
+
+        updated_root = read_wf_record_source(factory.record_metadata.id, 'arxiv')
+        assert updated_root.json == record_update
 
 
 def test_merge_callback_url_with_malformed_workflow(workflow_app, enable_merge_on_update, disable_file_upload):
-    factory = TestRecordMetadata.create_from_file(
-        __name__, 'record_for_merging.json')
+    with patch('inspire_json_merger.config.ArxivOnArxivOperations.conflict_filters', ['acquisition_source.source']):
+        factory = TestRecordMetadata.create_from_file(
+            __name__, 'merge_record_arxiv.json')
 
-    record_update = RECORD_WITH_CONFLICTS
-    record_update.update({
-        'dois': factory.record_metadata.json.get('dois'),
-    })
+        record_update = RECORD_WITH_CONFLICTS
+        record_update.update({
+            'arxiv_eprints': factory.record_metadata.json.get('arxiv_eprints')
+        })
 
-    eng_uuid = start('article', [record_update])
+        eng_uuid = start('article', [record_update])
 
-    eng = WorkflowEngine.from_uuid(eng_uuid)
-    obj = eng.objects[0]
+        eng = WorkflowEngine.from_uuid(eng_uuid)
+        obj = eng.objects[0]
 
-    conflicts = obj.extra_data.get('conflicts')
+        conflicts = obj.extra_data.get('conflicts')
 
-    expected_url = 'http://localhost:5000/callback/workflows/resolve_merge_conflicts'
+        expected_url = 'http://localhost:5000/callback/workflows/resolve_merge_conflicts'
 
-    assert obj.status == ObjectStatus.HALTED
-    assert expected_url == obj.extra_data.get('callback_url')
-    assert len(conflicts) == 1
-    assert obj.extra_data.get('is-update') is True
+        assert obj.status == ObjectStatus.HALTED
+        assert expected_url == obj.extra_data.get('callback_url')
+        assert len(conflicts) == 1
 
-    payload = {
-        'id': obj.id,
-        'metadata': 'Jessica Jones',
-        '_extra_data': 'Frank Castle'
-    }
+        assert obj.extra_data.get('is-update') is True
+        assert obj.extra_data['merger_root'] == record_update
 
-    with workflow_app.test_client() as client:
-        response = client.put(
-            obj.extra_data.get('callback_url'),
-            data=json.dumps(payload),
-            content_type='application/json',
-        )
+        payload = {
+            'id': obj.id,
+            'metadata': 'Jessica Jones',
+            '_extra_data': 'Frank Castle'
+        }
 
-    data = json.loads(response.get_data())
-    expected_message = 'The workflow request is malformed.'
+        with workflow_app.test_client() as client:
+            response = client.put(
+                obj.extra_data.get('callback_url'),
+                data=json.dumps(payload),
+                content_type='application/json',
+            )
 
-    assert response.status_code == 400
-    assert expected_message == data['message']
+        data = json.loads(response.get_data())
+        expected_message = 'The workflow request is malformed.'
 
-    eng = WorkflowEngine.from_uuid(eng_uuid)
-    obj = eng.objects[0]
+        assert response.status_code == 400
+        assert expected_message == data['message']
 
-    assert obj.status == ObjectStatus.HALTED
-    assert obj.extra_data.get('callback_url') is not None
-    assert obj.extra_data.get('conflicts') is not None
+        eng = WorkflowEngine.from_uuid(eng_uuid)
+        obj = eng.objects[0]
+
+        assert obj.status == ObjectStatus.HALTED
+        assert obj.extra_data.get('callback_url') is not None
+        assert obj.extra_data.get('conflicts') is not None
+        assert obj.extra_data['merger_root'] is not None
+
+        updated_root = read_wf_record_source(factory.record_metadata.id, 'arxiv')
+        assert updated_root is None
