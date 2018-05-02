@@ -33,11 +33,30 @@ from factories.db.invenio_records import TestRecordMetadata
 
 # FIXME: otherwise this task is not found by Celery.
 from inspirehep.modules.orcid.tasks import orcid_push  # noqa: F401
+<<<<<<< Updated upstream
+=======
+from inspirehep.modules.records.api import InspireRecord
+>>>>>>> Stashed changes
 from inspirehep.modules.workflows.tasks.upload import store_root, store_record
 from inspirehep.modules.workflows.utils import (
     insert_wf_record_source,
     read_wf_record_source,
 )
+<<<<<<< Updated upstream
+=======
+
+
+def fake_record(title, rec_id):
+    return {
+        '$schema': 'http://localhost:5000/schemas/records/hep.json',
+        'titles': [{'title': title}],
+        '_collections': ['Literature'],
+        'document_type': ['article'],
+        'acquisition_source': {'source': 'arxiv'},
+        'arxiv_eprints': [{'value': '1701.01431', 'categories': ['cs']}],
+        'control_number': rec_id
+    }
+>>>>>>> Stashed changes
 
 
 @patch('inspirehep.modules.orcid.tasks.attempt_push')
