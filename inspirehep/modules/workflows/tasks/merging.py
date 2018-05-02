@@ -53,7 +53,7 @@ def get_head_source(head_uuid):
         * None if there are no root records
     """
     roots_sources = set(
-        r.source for r in
+        r.source.name for r in
         WorkflowsRecordSources.query.filter_by(record_id=head_uuid).all()
     )
 
