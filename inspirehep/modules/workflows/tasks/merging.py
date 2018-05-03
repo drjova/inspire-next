@@ -60,7 +60,7 @@ def get_head_source(head_uuid):
     if not roots_sources:
         return None
 
-    return 'arxiv' if 'arxiv' in roots_sources else 'publisher'
+    return 'publisher' if 'publisher' in roots_sources else 'arxiv'
 
 
 @with_debug_logging

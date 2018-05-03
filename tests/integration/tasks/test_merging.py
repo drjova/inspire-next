@@ -43,7 +43,7 @@ def test_get_head_source_no_rec_on_the_db_gives_none(app):
     assert get_head_source('7753a30b-1111-2222-3333-d5020069b3ab') is None
 
 
-def test_get_head_source_return_arxiv_when_one_arxive_source_present(app, simple_record):
+def test_get_head_source_return_arxiv_when_one_arxiv_source_present(app, simple_record):
     # XXX: for some reason, this must be internal.
     from inspirehep.modules.records.api import InspireRecord
 
@@ -52,9 +52,9 @@ def test_get_head_source_return_arxiv_when_one_arxive_source_present(app, simple
     uuid = rec.id
 
     # two sources for the same record
-    insert_wf_record_source(json=simple_record, record_uuid=uuid, source='publisher')
-
-    assert get_head_source(uuid) == 'publisher'
-
     insert_wf_record_source(json=simple_record, record_uuid=uuid, source='arxiv')
+
     assert get_head_source(uuid) == 'arxiv'
+
+    insert_wf_record_source(json=simple_record, record_uuid=uuid, source='publisher')
+    assert get_head_source(uuid) == 'publisher'
