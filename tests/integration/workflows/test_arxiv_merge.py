@@ -168,7 +168,7 @@ def test_merge_without_conflicts_rootful(workflow_app, enable_merge_on_update, d
         record_update.update({
             'arxiv_eprints': factory.record_metadata.json.get('arxiv_eprints')
         })
-        
+
         ARXIV_ROOT.update({
             'arxiv_eprints': factory.record_metadata.json.get('arxiv_eprints')
         })
