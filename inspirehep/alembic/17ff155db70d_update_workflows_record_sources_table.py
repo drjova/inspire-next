@@ -15,6 +15,8 @@ import sqlalchemy as sa
 from alembic import op
 from datetime import datetime
 
+from sqlalchemy_utils.types import ChoiceType
+
 
 # revision identifiers, used by Alembic.
 revision = '17ff155db70d'
@@ -55,7 +57,8 @@ def upgrade():
         'workflows_record_sources',
         'source',
         existing_type=sa.Text,
-        type_=sa.Enum(SourceEnum),
+        type_=ChoiceType(SourceEnum, impl=sa.Integer()),
+        postgresql_using='source::integer',
     )
 
     op.alter_column(
@@ -83,6 +86,7 @@ def downgrade():
         'source',
         existing_type=sa.Enum(SourceEnum),
         type_=sa.Text,
+        postgresql_using='source::text',
     )
 
     op.alter_column(
