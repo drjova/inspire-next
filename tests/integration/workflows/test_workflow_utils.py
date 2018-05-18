@@ -60,6 +60,32 @@ def test_wf_record_source_read_and_write(dummy_record):
     assert dummy_record == retrieved_root.json
 
 
+def test_wf_record_with_desy_source_read_and_write(dummy_record):
+    insert_wf_record_source(
+        json=dummy_record,
+        record_uuid=dummy_record.id,
+        source='desy'
+    )
+    db.session.commit()
+
+    retrieved_root = read_wf_record_source(
+        record_uuid=dummy_record.id, source='publisher')
+    assert dummy_record == retrieved_root.json
+
+
+def test_wf_record_with_submitter_source_read_and_write(dummy_record):
+    insert_wf_record_source(
+        json=dummy_record,
+        record_uuid=dummy_record.id,
+        source='submitter'
+    )
+    db.session.commit()
+
+    retrieved_root = read_wf_record_source(
+        record_uuid=dummy_record.id, source='submitter')
+    assert dummy_record == retrieved_root.json
+
+
 def test_test_wf_record_source_update(dummy_record):
     insert_wf_record_source(
         json=dummy_record,
