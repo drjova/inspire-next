@@ -25,15 +25,17 @@
 from __future__ import absolute_import, division, print_function
 
 from inspire_dojson.utils import get_recid_from_ref, strip_empty_values
-from marshmallow import Schema, fields, post_dump, pre_dump
+from inspire_utils.date import format_date
+from marshmallow import Schema, fields, missing, pre_dump, post_dump
 
 from inspirehep.modules.records.serializers.fields.list_with_limit import ListWithLimit
 from inspirehep.modules.records.utils import get_linked_records_in_field
 
 from .common import (
     AuthorSchemaV1,
-    ConferenceInfoSchemaV1,
+    ConferenceInfoItemSchemaV1,
     IsbnSchemaV1,
+    PublicationInfoItemSchemaV1,
     ReferencesItemSchemaV1,
     SupervisorSchemaV1,
     ThesisInfoSchemaV1,
@@ -57,7 +59,7 @@ class RecordMetadataSchemaV1(Schema):
     # citeable = fields.Raw()
     collaborations = fields.Raw()
     conference_info = fields.Nested(
-        ConferenceInfoSchemaV1,
+        ConferenceInfoItemSchemaV1,
         dump_only=True,
         attribute='publication_info',
         many=True)
@@ -66,7 +68,7 @@ class RecordMetadataSchemaV1(Schema):
     # core = fields.Raw()
     corporate_author = fields.Raw()
     # curated = fields.Raw()
-    date = fields.Raw()
+    date = fields.Method('get_formatted_date')
     # deleted = fields.Raw()
     # deleted_records = fields.Raw()
     document_type = fields.Raw()
@@ -85,13 +87,13 @@ class RecordMetadataSchemaV1(Schema):
     # legacy_creation_date = fields.Raw()
     # license = fields.Raw()
     # new_record = fields.Raw()
-    number_of_authors = fields.Raw()
+    number_of_authors = fields.Method('get_number_of_authors')
     number_of_pages = fields.Raw()
-    number_of_references = fields.Raw()
+    number_of_references = fields.Method('get_number_of_references')
     persistent_identifiers = fields.Raw()
     preprint_date = fields.Raw()
     # public_notes = fields.Raw()
-    publication_info = fields.Raw()
+    publication_info = fields.Nested(PublicationInfoItemSchemaV1, dump_only=True, many=True)
     # publication_type = fields.Raw()
     # record_affiliations = fields.Raw()
     # refereed = fields.Raw()
@@ -112,6 +114,26 @@ class RecordMetadataSchemaV1(Schema):
     titles = fields.Raw()
     # urls = fields.Raw()
     # withdrawn = fields.Raw()
+
+    def get_formatted_date(self, data):
+        earliest_date = data.get('earliest_date')
+        if earliest_date is None:
+            return missing
+        return format_date(earliest_date)
+
+    def get_number_of_authors(self, data):
+        authors = data.get('authors')
+        return self.get_len_or_missing(authors)
+
+    def get_number_of_references(self, data):
+        references = data.get('references')
+        return self.get_len_or_missing(references)
+
+    @staticmethod
+    def get_len_or_missing(maybe_none_list):
+        if maybe_none_list is None:
+            return missing
+        return len(maybe_none_list)
 
     @post_dump
     def strip_empty(self, data):
