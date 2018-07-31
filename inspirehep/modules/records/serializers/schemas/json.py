@@ -25,13 +25,19 @@
 from __future__ import absolute_import, division, print_function
 
 from inspire_dojson.utils import get_recid_from_ref, strip_empty_values
-from inspire_utils.helpers import force_list
 from marshmallow import Schema, fields, post_dump, pre_dump
 
 from inspirehep.modules.records.serializers.fields.list_with_limit import ListWithLimit
 from inspirehep.modules.records.utils import get_linked_records_in_field
 
-from .common import AuthorSchemaV1, IsbnSchemaV1, ThesisInfoSchemaV1, SupervisorSchemaV1, ConferenceInfoItemSchemaV1
+from .common import (
+    AuthorSchemaV1,
+    ConferenceInfoSchemaV1,
+    IsbnSchemaV1,
+    ReferencesItemSchemaV1,
+    SupervisorSchemaV1,
+    ThesisInfoSchemaV1,
+)
 
 
 class RecordMetadataSchemaV1(Schema):
@@ -40,12 +46,18 @@ class RecordMetadataSchemaV1(Schema):
     accelerator_experiments = fields.Raw()
     acquisition_source = fields.Raw()
     arxiv_eprints = fields.Raw()
-    authors = ListWithLimit(fields.Nested(AuthorSchemaV1, dump_only=True), limit=10)
+    authors = ListWithLimit(
+        fields.Nested(
+            AuthorSchemaV1,
+            dump_only=True
+        ),
+        limit=10
+    )
     book_series = fields.Raw()
     # citeable = fields.Raw()
     collaborations = fields.Raw()
     conference_info = fields.Nested(
-        ConferenceInfoItemSchemaV1,
+        ConferenceInfoSchemaV1,
         dump_only=True,
         attribute='publication_info',
         many=True)
@@ -86,7 +98,14 @@ class RecordMetadataSchemaV1(Schema):
     # related_records = fields.Raw()
     report_numbers = fields.Raw()
     # self = fields.Raw()
-    supervisors = ListWithLimit(fields.Nested(SupervisorSchemaV1, dump_only=True), attribute='authors', limit=10)
+    supervisors = ListWithLimit(
+        fields.Nested(
+            SupervisorSchemaV1,
+            dump_only=True
+        ),
+        attribute='authors',
+        limit=10
+    )
     texkeys = fields.Raw()
     thesis_info = fields.Nested(ThesisInfoSchemaV1, dump_only=True)
     # title_translations = fields.Raw()
@@ -111,9 +130,16 @@ class RecordSchemaJSONUIV1(Schema):
 
 
 class MetadataAuthorsSchemaV1(Schema):
-    authors = fields.Nested(AuthorSchemaV1, default=[], dump_only=True, many=True)
+    authors = fields.Nested(
+        AuthorSchemaV1, default=[], dump_only=True, many=True)
     collaborations = fields.Raw(default=[], dump_only=True)
-    supervisors = fields.Nested(SupervisorSchemaV1, default=[], dump_only=True, many=True, attribute='authors')
+    supervisors = fields.Nested(
+        SupervisorSchemaV1,
+        default=[],
+        dump_only=True,
+        many=True,
+        attribute='authors'
+    )
 
     @post_dump
     def strip_empty(self, data):
@@ -126,23 +152,9 @@ class AuthorsSchemaJSONUIV1(RecordSchemaJSONUIV1):
     metadata = fields.Nested(MetadataAuthorsSchemaV1, dump_only=True)
 
 
-class MetadataReferencesSchemaItemV1(Schema):
-    arxiv_eprints = fields.List(fields.Dict())
-    authors = ListWithLimit(fields.Nested(AuthorSchemaV1, dump_only=True), limit=10)
-    collaborations = fields.List(fields.Dict())
-    control_number = fields.Int()
-    dois = fields.List(fields.Dict())
-    external_system_identifiers = fields.List(fields.Dict())
-    label = fields.String()
-    publication_info = fields.List(fields.Dict())
-    supervisors = ListWithLimit(fields.Nested(SupervisorSchemaV1, dump_only=True), attribute='authors', limit=10)
-    titles = fields.List(fields.Dict())
-    urls = fields.List(fields.Dict())
-
-
 class MetadataReferencesSchemaUIV1(Schema):
     references = fields.Nested(
-        MetadataReferencesSchemaItemV1, many=True, dump_only=True)
+        ReferencesItemSchemaV1, many=True, default=[], dump_only=True)
 
     @post_dump
     def strip_empty(self, data):
@@ -154,7 +166,7 @@ class ReferencesSchemaJSONUIV1(RecordSchemaJSONUIV1):
     metadata = fields.Nested(MetadataReferencesSchemaUIV1, dump_only=True)
 
     @pre_dump
-    def processed_refs(self, data):
+    def process_refs(self, data):
         resolved = []
         references = data['metadata'].get('references')
         if not references:
@@ -162,42 +174,19 @@ class ReferencesSchemaJSONUIV1(RecordSchemaJSONUIV1):
             return data
 
         reference_records = self.resolve_records(data)
-        for reference in references:
+        for index, reference in enumerate(references):
             if 'record' in reference:
                 reference_record_id = get_recid_from_ref(
                     reference.get('record'))
                 reference_record = reference_records.get(
                     reference_record_id)
-                reference = self.resolve_record(reference, reference_record)
-            else:
-                reference = self.format_reference(reference)
+                references[index]['record'] = reference_record
 
             if reference:
                 resolved.append(reference)
 
         data['metadata']['references'] = resolved
         return data
-
-    def format_reference(self, reference):
-        reference.update(reference.get('reference', {}))
-        reference.pop('reference', None)
-        reference.update({
-            'publication_info': self.prepare_publication_info(
-                reference.get('publication_info', {})),
-            'arxiv_eprints': self.prepare_arxiv_eprint(
-                reference.get('arxiv_eprint')),
-            'collaborations': self.prepare_collaborations(
-                reference.get('collaborations', [])),
-            'dois': self.prepare_dois(reference.get('dois', [])),
-            'titles': self.prepare_titles(reference.get('title', [])),
-        })
-        reference = strip_empty_values(reference)
-        return self.only_meaningful_data(reference)
-
-    def resolve_record(self, reference, reference_record):
-        if reference_record:
-            return reference_record
-        return self.format_reference(reference)
 
     @staticmethod
     def resolve_records(data):
@@ -207,36 +196,3 @@ class ReferencesSchemaJSONUIV1(RecordSchemaJSONUIV1):
             record['control_number']: record
             for record in resolved_records
         }
-
-    @staticmethod
-    def only_meaningful_data(reference):
-        if any(key in reference for
-               key in ['titles', 'authors', 'publication_info']):
-            return reference
-
-    @staticmethod
-    def prepare_publication_info(publication_info):
-        return force_list(
-            publication_info
-            if {'journal_title', 'pubinfo_freetext'}.issubset(publication_info.keys())
-            else None
-        )
-
-    @staticmethod
-    def prepare_arxiv_eprint(arxiv_eprint):
-        if not arxiv_eprint:
-            return
-        return [{'value': arxiv_eprint}]
-
-    @staticmethod
-    def prepare_titles(titles):
-        return force_list(titles)
-
-    @staticmethod
-    def prepare_dois(dois):
-        return [{'value': doi} for doi in dois]
-
-    @staticmethod
-    def prepare_collaborations(collaborations):
-        return [
-            {'value': collaboration} for collaboration in collaborations]

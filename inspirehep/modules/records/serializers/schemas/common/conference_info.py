@@ -22,9 +22,24 @@
 
 from __future__ import absolute_import, division, print_function
 
-from .author import AuthorSchemaV1  # noqa: F401
-from .conference_info import ConferenceInfoSchemaV1  # noqa: F401
-from .isbn import IsbnSchemaV1  # noqa: F401
-from .references_info import ReferencesItemSchemaV1  # noqa: F401
-from .supervisor import SupervisorSchemaV1  # noqa: F401
-from .thesis_info import ThesisInfoSchemaV1  # noqa: F401
+from marshmallow import Schema, pre_dump, fields
+
+from inspirehep.modules.records.utils import get_pid_from_record_uri
+from inspirehep.utils.record_getter import get_db_record
+
+
+class ConferenceInfoSchemaV1(Schema):
+    titles = fields.Raw()
+    control_number = fields.Raw()
+
+    @pre_dump
+    def resolve_conference_record_as_root(self, pub_info_item):
+        conference_record = pub_info_item.get('conference_record')
+        if conference_record is None:
+            return {}
+        _, recid = get_pid_from_record_uri(conference_record.get('$ref'))
+        conference = get_db_record('con', recid).dumps()
+        titles = conference.get('titles')
+        if titles is None:
+            return {}
+        return conference

@@ -26,6 +26,7 @@ import json
 
 from inspirehep.modules.records.serializers.schemas.json import \
     ReferencesSchemaJSONUIV1, RecordSchemaJSONUIV1
+
 from factories.db.invenio_records import TestRecordMetadata
 
 
@@ -41,14 +42,6 @@ def test_references_schema_with_record(isolated_app):
         'authors': [
             {
                 'full_name': 'Frank Castle',
-            },
-            {
-                'full_name': 'Smith, Jim',
-                'inspire_roles': ['editor'],
-            },
-            {
-                'full_name': 'Jimmy',
-                'inspire_roles': ['supervisor'],
             },
         ],
         'dois': [
@@ -84,6 +77,7 @@ def test_references_schema_with_record(isolated_app):
         }],
     }
     TestRecordMetadata.create_from_kwargs(json=cited_record)
+
     record = {
         'metadata': {
             'references': [
@@ -105,71 +99,86 @@ def test_references_schema_with_record(isolated_app):
                         }
                     }
                 },
+                {
+                    'reference': {
+                        'titles': {
+                            'title': 'Jessica Jones',
+                        },
+                        'authors': [{
+                            'full_name': 'Frank Castle',
+                        }],
+                        'label': '1',
+                        'publication_info': {
+                            'artid': '02B006',
+                            'journal_title': 'PTEP',
+                            'journal_volume': '2012',
+                            'year': 2012,
+                        }
+                    }
+                },
+                {
+                    'reference': {
+                        'authors': [{
+                            'full_name': 'Jessica, Jones'
+                        }],
+                        'misc': ['The J-PARC KOTO experiment 006'],
+                    }
+                },
             ],
         },
     }
     expected = {
-        'metadata': {
-            'references': [
+        "metadata": {
+            "references": [
                 {
-                    'arxiv_eprints': [
+                    "authors": [
                         {
-                            'value': '1607.06746'
+                            "first_name": "Frank Castle",
+                            "full_name": "Frank Castle"
                         }
                     ],
-                    'control_number': 123,
-                    'collaborations': [
+                    "control_number": 123,
+                    "label": "389",
+                    "publication_info": [
                         {
-                            'value': 'LHCb'
-                        }
-                    ],
-                    'dois': [
-                        {
-                            'value': '10.1088/1361-6633/aa5514'
-                        }
-                    ],
-                    'titles': [
-                        {
-                            'title': 'Jessica Jones'
-                        }
-                    ],
-                    'authors': [  # only first 10 authors and supervisors are returned
-                        {
-                            'full_name': 'Frank Castle',
-                            'first_name': 'Frank Castle',
-                        },
-                        {
-                            'full_name': 'Smith, Jim',
-                            'first_name': 'Jim',
-                            'last_name': 'Smith',
-                            'inspire_roles': ['editor'],
-                        },
-                    ],
-                    'supervisors': [
-                        {
-                            'full_name': 'Jimmy',
-                            'first_name': 'Jimmy',
-                            'inspire_roles': ['supervisor'],
-                        },
-                    ],
-                    'publication_info': [
-                        {
-                            'journal_recid': 1214416,
-                            'journal_title': 'Rept.Prog.Phys.',
-                            'journal_volume': '80',
-                            'journal_record': {
-                                '$ref': 'http://labs.inspirehep.net/api/journals/1214416'
+                            "artid": "046201",
+                            "journal_issue": "4",
+                            "journal_record": {
+                                "$ref": "http://labs.inspirehep.net/api/journals/1214416"
                             },
-                            'artid': '046201',
-                            'year': 2017,
-                            'journal_issue': '4'
+                            "journal_title": "Rept.Prog.Phys.",
+                            "journal_volume": "80",
+                            "year": 2017
                         }
                     ],
-                    'urls': [
+                    "titles": [
                         {
-                            'value': 'http://sf2a.eu/semaine-sf2a/2013/proceedings/'
+                            "title": "Jessica Jones"
+                        }
+                    ]
+                },
+                {
+                    "authors": [
+                        {
+                            "first_name": "Frank Castle",
+                            "full_name": "Frank Castle"
                         }
                     ],
+                    "label": "1",
+                    "titles": [
+                        {
+                            "title": "Jessica Jones"
+                        }
+                    ]
+                },
+                {
+                    "authors": [
+                        {
+                            "first_name": "Jones",
+                            "full_name": "Jessica, Jones",
+                            "last_name": "Jessica"
+                        }
+                    ]
                 }
             ]
         }
