@@ -36,7 +36,7 @@ from .common import (
     ConferenceInfoItemSchemaV1,
     IsbnSchemaV1,
     PublicationInfoItemSchemaV1,
-    ReferencesItemSchemaV1,
+    ReferenceItemSchemaV1,
     SupervisorSchemaV1,
     ThesisInfoSchemaV1,
 )
@@ -176,7 +176,7 @@ class AuthorsSchemaJSONUIV1(RecordSchemaJSONUIV1):
 
 class MetadataReferencesSchemaUIV1(Schema):
     references = fields.Nested(
-        ReferencesItemSchemaV1, many=True, default=[], dump_only=True)
+        ReferenceItemSchemaV1, many=True, default=[], missing=missing, dump_only=True)
 
     @post_dump
     def strip_empty(self, data):
@@ -185,6 +185,7 @@ class MetadataReferencesSchemaUIV1(Schema):
 
 class ReferencesSchemaJSONUIV1(RecordSchemaJSONUIV1):
     """Schema for references."""
+
     metadata = fields.Nested(MetadataReferencesSchemaUIV1, dump_only=True)
 
     @pre_dump
@@ -218,3 +219,7 @@ class ReferencesSchemaJSONUIV1(RecordSchemaJSONUIV1):
             record['control_number']: record
             for record in resolved_records
         }
+
+    @post_dump
+    def strip_empty(self, data):
+        import ipdb; ipdb.set_trace()

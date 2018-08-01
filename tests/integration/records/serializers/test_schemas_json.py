@@ -143,17 +143,8 @@ def test_references_schema_with_record(isolated_app):
                         {
                             "artid": "046201",
                             "journal_issue": "4",
-                            "journal_record": {
-                                "$ref": "http://labs.inspirehep.net/api/journals/1214416"
-                            },
                             "journal_title": "Rept.Prog.Phys.",
-                            "journal_volume": "80",
-                            "year": 2017
-                        }
-                    ],
-                    "titles": [
-                        {
-                            "title": "Jessica Jones"
+                            "journal_volume": "80"
                         }
                     ]
                 },
@@ -165,9 +156,11 @@ def test_references_schema_with_record(isolated_app):
                         }
                     ],
                     "label": "1",
-                    "titles": [
+                    "publication_info": [
                         {
-                            "title": "Jessica Jones"
+                            "artid": "02B006",
+                            "journal_title": "PTEP",
+                            "journal_volume": "2012"
                         }
                     ]
                 },
@@ -238,18 +231,11 @@ def test_conference_info_schema_with_record(isolated_app):
                     'artid': '02B006',
                     'journal_title': 'PTEP',
                     'journal_volume': '2012',
-                    'year': 2012,
-                    'conference_record': {
-                        '$ref': 'http://labs.inspirehep.net/api/journals/972464'
-                    }
-
                 },
                 {
                     'artid': '02B006',
                     'journal_title': 'PTEP',
                     'journal_volume': '2012',
-                    'year': 2012
-
                 }
             ],
             'conference_info': [

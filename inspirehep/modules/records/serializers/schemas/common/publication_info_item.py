@@ -34,7 +34,6 @@ class PublicationInfoItemSchemaV1(Schema):
     page_start = fields.Raw()
     page_end = fields.Raw()
     pubinfo_freetext = fields.Raw()
-    year = fields.Raw()
 
     @pre_dump
     def empty_if_display_display_fields_missing(self, data):

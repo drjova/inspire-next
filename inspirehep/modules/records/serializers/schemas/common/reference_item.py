@@ -24,22 +24,25 @@ from __future__ import absolute_import, division, print_function
 
 from marshmallow import Schema, pre_dump, fields
 
-from inspirehep.modules.records.utils import get_pid_from_record_uri
-from inspirehep.utils.record_getter import get_db_record
+from inspirehep.modules.records.serializers.fields.list_with_limit import ListWithLimit
+
+from .author import AuthorSchemaV1
+from .publication_info_item import PublicationInfoItemSchemaV1
 
 
-class ConferenceInfoSchemaV1(Schema):
-    titles = fields.Raw()
-    control_number = fields.Raw()
+class ReferenceItemSchemaV1(Schema):
+    authors = ListWithLimit(fields.Nested(AuthorSchemaV1, dump_only=True), limit=10)
+    control_number = fields.Int()
+    label = fields.String()
+    publication_info = fields.List(
+        fields.Nested(PublicationInfoItemSchemaV1), dump_only=True)
 
     @pre_dump
-    def resolve_conference_record_as_root(self, pub_info_item):
-        conference_record = pub_info_item.get('conference_record')
-        if conference_record is None:
-            return {}
-        _, recid = get_pid_from_record_uri(conference_record.get('$ref'))
-        conference = get_db_record('con', recid).dumps()
-        titles = conference.get('titles')
-        if titles is None:
-            return {}
-        return conference
+    def get_record_or_reference(self, data):
+        if 'record' in data:
+            data['record'].update({
+                'label': data['reference'].get('label')
+            })
+            return data['record']
+        elif 'reference' in data:
+            return data['reference']
