@@ -20,42 +20,8 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
-"""Submissions views."""
+"""Schemas module."""
 
 from __future__ import absolute_import, division, print_function
 
-from flask import Blueprint, jsonify
-from flask.views import MethodView
-
-from inspirehep.utils.record_getter import get_db_record
-
-from .serializers.json import author_serializer
-
-blueprint = Blueprint(
-    'inspirehep_submissions',
-    __name__,
-    template_folder='templates',
-    url_prefix='/submissions',
-)
-
-
-class SubmissionsResource(MethodView):
-
-    def get(self, name, pid_value=None):
-        record = get_db_record(name, pid_value)
-        serialized = author_serializer().dump(record.dumps())
-        return jsonify(serialized.data)
-
-
-submissions_view = SubmissionsResource.as_view(
-    'submissions_view'
-)
-
-blueprint.add_url_rule(
-    '/<name>',
-    view_func=submissions_view,
-)
-blueprint.add_url_rule(
-    '/<name>/<int:pid_value>',
-    view_func=submissions_view,
-)
+from .author import Author  # noqa: F401
