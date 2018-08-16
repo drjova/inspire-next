@@ -30,7 +30,7 @@
 -e git+https://github.com/inspirehep/dictdiffer.git#egg=dictdiffer
 
 # For testing new authors schema
--e git+https://github.com/michamos/inspire-schemas.git@author_finalization#egg=inspire-schemas
+-e git+https://github.com/vbalbp/inspire-schemas.git@michamos-author_finalization#egg=inspire-schemas
 -e git+https://github.com/drjova/inspire-json-merger.git@test-authors#egg=inspire-json-merger
 -e git+https://github.com/drjova/inspire-query-parser.git@test-authors#egg=inspire-query-parser
 -e git+https://github.com/drjova/inspire-dojson.git@test-authors#egg=inspire-dojson

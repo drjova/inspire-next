@@ -42,9 +42,9 @@ blueprint = Blueprint(
 class SubmissionsResource(MethodView):
 
     def get(self, name, pid_value=None):
-        record = get_db_record(name, pid_value)
+        record = get_db_record('aut', pid_value)
         serialized = author_serializer().dump(record.dumps())
-        return jsonify(serialized.data)
+        return jsonify({'data': serialized.data})
 
 
 submissions_view = SubmissionsResource.as_view(
