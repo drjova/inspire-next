@@ -20,30 +20,30 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
-from marshmallow import Schema, fields, pre_dump, missing
+from marshmallow import Schema, fields, pre_dump, missing, post_load
+from inspire_schemas.builders.authors import AuthorBuilder
 from inspire_utils.record import get_value, get_values_for_schema
 
 
 class Author(Schema):
-    # dump
-    display_name = fields.Raw(dump_only=True)
-    family_name = fields.Raw(dump_only=True)
-    given_name = fields.Raw(dump_only=True)
-    native_names = fields.Raw(dumps_only=True)
-    public_emails = fields.Raw(dumps_only=True)
+    display_name = fields.Raw()
+    family_name = fields.Raw()
+    given_name = fields.Raw()
+    native_names = fields.Raw()
+    public_emails = fields.Raw()
 
-    status = fields.Raw(dump_only=True)
-    arxiv_categories = fields.Raw(dump_only=True)
-    websites = fields.Raw(dump_only=True)
-    twitter = fields.Raw(dump_only=True)
-    blog = fields.Raw(dump_only=True)
-    linkedin = fields.Raw(dump_only=True)
+    status = fields.Raw()
+    arxiv_categories = fields.Raw()
+    websites = fields.Raw()
+    twitter = fields.Raw()
+    blog = fields.Raw()
+    linkedin = fields.Raw()
 
-    positions = fields.Raw(dump_only=True)
-    project_membership = fields.Raw(dump_only=True)
-    advisors = fields.Raw(dump_only=True)
+    positions = fields.Raw()
+    project_membership = fields.Raw()
+    advisors = fields.Raw()
 
-    comments = fields.Raw(dumps_only=True)
+    comments = fields.Raw()
 
     @pre_dump
     def before_dump(self, data):
@@ -87,3 +87,78 @@ class Author(Schema):
         if value:
             return value.pop()
         return missing
+
+    @post_load
+    def build_author(self, data):
+        author = AuthorBuilder()
+
+        for advisor in data.get('advisors', []):
+            name = advisor.get('name')
+            degree_type = advisor.get('degree_type')
+            author.add_advisor(name, None, degree_type)
+
+        for arxiv_category in data.get('arxiv_categories', []):
+            author.add_research_field(arxiv_category)
+
+        blog = data.get('blog')
+        if blog:
+            author.add_blog(blog)
+
+        comments = data.get('comments')
+        if comments:
+            author.add_comment(comments)
+
+        display_name = data.get('display_name')
+        if comments:
+            author.set_display_name(display_name)
+
+        family_name = data.get('family_name')
+        given_name = data.get('given_name')
+        full_name = self.get_full_name(family_name, given_name)
+        if full_name:
+            author.set_name(full_name)
+
+        linkedin = data.get('linkedin')
+        if linkedin:
+            author.add_linkedin(linkedin)
+
+        native_name = data.get('native_name')
+        if native_name:
+            author.add_native_name(native_name)
+
+        for position in data.get('positions', []):
+            institution_name = position.get('institution')
+            start_date = position.get('start_date')
+            end_date = position.get('end_date')
+            rank = position.get('rank')
+            current = position.get('current')
+            author.add_institution(
+                institution_name, start_date, end_date, rank, None, False, current)
+
+        for project in data.get('project_membership', []):
+            name = project.get('name')
+            start_date = project.get('start_date')
+            end_date = project.get('end_date')
+            current = project.get('current')
+            author.add_project(name, None, start_date, end_date, False, current)
+
+        for email in data.get('public_emails', []):
+            author.add_email_address(email)
+
+        status = data.get('status')
+        if status:
+            author.set_status(status)
+
+        twitter = data.get('twitter')
+        if twitter:
+            author.add_twitter(twitter)
+
+        for website in data.get('websites', []):
+            author.add_url(website)
+
+        return author.obj
+
+    def get_full_name(self, given_name, family_name):
+        if given_name and family_name:
+            return '{} {}'.format(given_name, family_name)
+        return None
