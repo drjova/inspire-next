@@ -109,7 +109,7 @@ class Author(Schema):
             author.add_comment(comments)
 
         display_name = data.get('display_name')
-        if comments:
+        if display_name:
             author.set_display_name(display_name)
 
         family_name = data.get('family_name')
@@ -161,4 +161,4 @@ class Author(Schema):
     def get_full_name(self, given_name, family_name):
         if given_name and family_name:
             return '{} {}'.format(given_name, family_name)
-        return None
+        return given_name or family_name
