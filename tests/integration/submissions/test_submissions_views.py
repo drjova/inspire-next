@@ -30,7 +30,7 @@ def test_new_author_submit_with_required_fields(api_client):
     login_user_via_session(api_client, email='johndoe@inspirehep.net')
 
     response = api_client.post(
-        '/submissions/author',
+        '/submissions/authors',
         content_type='application/json',
         data=json.dumps({
             'given_name': 'Harun',
@@ -56,14 +56,14 @@ def test_new_author_submit_with_required_fields(api_client):
         'status': 'active',
     }
 
-    assert obj.extra_data['is-update'] == False
+    assert obj.extra_data['is-update'] is False
 
 
 def test_update_author_submit_with_required_fields(api_client):
     login_user_via_session(api_client, email='johndoe@inspirehep.net')
 
     response = api_client.put(
-        '/submissions/author/123',
+        '/submissions/authors/123',
         content_type='application/json',
         data=json.dumps({
             'given_name': 'Harun',
@@ -90,4 +90,4 @@ def test_update_author_submit_with_required_fields(api_client):
         'status': 'active',
     }
 
-    assert obj.extra_data['is-update'] == True
+    assert obj.extra_data['is-update'] is True

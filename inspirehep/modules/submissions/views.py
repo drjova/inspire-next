@@ -34,6 +34,7 @@ from invenio_db import db
 from invenio_workflows import workflow_object_class, start
 
 from inspirehep.utils.record_getter import get_db_record
+from inspirehep.modules.pidstore.utils import get_pid_type_from_endpoint
 
 import json
 
@@ -46,36 +47,53 @@ blueprint = Blueprint(
     url_prefix='/submissions',
 )
 
+ENDPOINT_TO_DATA_TYPE = {
+    'literature': 'hep',
+    'authors': 'authors',
+}
 
-# TODO: use endpoint to generalize this for other types
+ENDPOINT_TO_WORKFLOW_NAME = {
+    'literature': 'article',
+    'authors': 'author',
+}
+
+ENDPOINT_TO_FORM_SERIALIZER = {
+    'authors': author_serializer,
+}
+
+
 class SubmissionsResource(MethodView):
 
     def get(self, endpoint, pid_value=None):
-        record = get_db_record('aut', pid_value)
-        serialized = author_serializer().dump(record.dumps())
+        pid_type = get_pid_type_from_endpoint(endpoint)
+        record = get_db_record(pid_type, pid_value)
+        serializer = ENDPOINT_TO_FORM_SERIALIZER[endpoint]
+        serialized = serializer().dump(record.dumps())
         return jsonify({'data': serialized.data})
 
     def post(self, endpoint, pid_value=None):
         submission_data = json.loads(request.data)
-        serialized_data = author_serializer().load(submission_data).data
-        workflow_object_id = self.start_workflow_for_submission(
-            serialized_data)
+        serializer = ENDPOINT_TO_FORM_SERIALIZER[endpoint]
+        serialized_data = serializer().load(submission_data).data
+        workflow_object_id = self.start_workflow_for_submission(endpoint,
+                                                                serialized_data)
         return jsonify({'workflow_object_id': workflow_object_id})
 
     def put(self, endpoint, pid_value=None):
         submission_data = json.loads(request.data)
-        serialized_data = author_serializer().load(submission_data).data
+        serializer = ENDPOINT_TO_FORM_SERIALIZER[endpoint]
+        serialized_data = serializer().load(submission_data).data
         serialized_data['control_number'] = int(pid_value)
         workflow_object_id = self.start_workflow_for_submission(
-            serialized_data, True)
+            endpoint, serialized_data, True)
         return jsonify({'workflow_object_id': workflow_object_id})
 
-    def start_workflow_for_submission(self, serialized_data, is_update=False):
+    def start_workflow_for_submission(self, endpoint, serialized_data, is_update=False):
 
         workflow_object = workflow_object_class.create(
             data={},
             id_user=current_user.get_id(),
-            data_type='authors'
+            data_type=ENDPOINT_TO_DATA_TYPE[endpoint]
         )
         workflow_object.data = serialized_data
         workflow_object.extra_data['is-update'] = is_update
@@ -90,8 +108,9 @@ class SubmissionsResource(MethodView):
         db.session.commit()
 
         workflow_object_id = workflow_object.id
-        # why singular here ??
-        start.delay("author", object_id=workflow_object.id)
+
+        start.delay(
+            ENDPOINT_TO_WORKFLOW_NAME[endpoint], object_id=workflow_object.id)
 
         return workflow_object_id
 
