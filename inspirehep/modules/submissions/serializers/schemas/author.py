@@ -98,7 +98,7 @@ class Author(Schema):
             author.add_advisor(name, None, degree_type)
 
         for arxiv_category in data.get('arxiv_categories', []):
-            author.add_research_field(arxiv_category)
+            author.add_arxiv_category(arxiv_category)
 
         blog = data.get('blog')
         if blog:
@@ -106,7 +106,7 @@ class Author(Schema):
 
         comments = data.get('comments')
         if comments:
-            author.add_comment(comments)
+            author.add_private_note(comments)
 
         display_name = data.get('display_name')
         if display_name:
