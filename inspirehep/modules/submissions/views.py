@@ -25,20 +25,21 @@
 from __future__ import absolute_import, division, print_function
 
 import copy
+import datetime
+import json
 
-from flask import Blueprint, jsonify, request
+from sqlalchemy.orm.exc import NoResultFound
+
+from flask import Blueprint, abort, jsonify, request
 from flask.views import MethodView
 from flask_login import current_user
 
 from invenio_db import db
 from invenio_workflows import workflow_object_class, start
-
-from inspirehep.utils.record_getter import get_db_record
-from inspirehep.modules.pidstore.utils import get_pid_type_from_endpoint
-
-import json
+from invenio_oauthclient.models import UserIdentity
 
 from .serializers.json import author_serializer
+from .utils import get_record_from_legacy
 
 blueprint = Blueprint(
     'inspirehep_submissions',
@@ -47,58 +48,73 @@ blueprint = Blueprint(
     url_prefix='/submissions',
 )
 
-ENDPOINT_TO_DATA_TYPE = {
-    'literature': 'hep',
-    'authors': 'authors',
-}
-
-ENDPOINT_TO_WORKFLOW_NAME = {
-    'literature': 'article',
-    'authors': 'author',
-}
-
-ENDPOINT_TO_FORM_SERIALIZER = {
-    'authors': author_serializer,
-}
-
 
 class SubmissionsResource(MethodView):
 
+    endpoint_to_data_type = {
+        'literature': 'hep',
+        'authors': 'authors',
+    }
+
+    endpoint_to_workflow_name = {
+        'literature': 'article',
+        'authors': 'author',
+    }
+
+    endpoint_to_form_serializer = {
+        'authors': author_serializer,
+    }
+
     def get(self, endpoint, pid_value=None):
-        pid_type = get_pid_type_from_endpoint(endpoint)
-        record = get_db_record(pid_type, pid_value)
-        serializer = ENDPOINT_TO_FORM_SERIALIZER[endpoint]
-        serialized = serializer().dump(record.dumps())
-        return jsonify({'data': serialized.data})
+        record = get_record_from_legacy(pid_value)
+        if not record:
+            abort(404)
 
-    def post(self, endpoint, pid_value=None):
-        submission_data = json.loads(request.data)
-        serializer = ENDPOINT_TO_FORM_SERIALIZER[endpoint]
-        serialized_data = serializer().load(submission_data).data
-        workflow_object_id = self.start_workflow_for_submission(endpoint,
-                                                                serialized_data)
-        return jsonify({'workflow_object_id': workflow_object_id})
+        serializer = self._get_serializer_from_endpoint(endpoint)
+        serialized_record = serializer().dump(record)
+        return jsonify({'data': serialized_record.data})
 
-    def put(self, endpoint, pid_value=None):
+    def post(self, endpoint):
         submission_data = json.loads(request.data)
-        serializer = ENDPOINT_TO_FORM_SERIALIZER[endpoint]
-        serialized_data = serializer().load(submission_data).data
-        serialized_data['control_number'] = int(pid_value)
         workflow_object_id = self.start_workflow_for_submission(
-            endpoint, serialized_data, True)
+            endpoint, submission_data['data'])
         return jsonify({'workflow_object_id': workflow_object_id})
 
-    def start_workflow_for_submission(self, endpoint, serialized_data, is_update=False):
+    def put(self, endpoint, pid_value):
+        submission_data = json.loads(request.data)
+        workflow_object_id = self.start_workflow_for_submission(
+            endpoint, submission_data['data'], pid_value)
+        return jsonify({'workflow_object_id': workflow_object_id})
 
+    def start_workflow_for_submission(self, endpoint, submission_data,
+                                      control_number=None):
         workflow_object = workflow_object_class.create(
             data={},
             id_user=current_user.get_id(),
-            data_type=ENDPOINT_TO_DATA_TYPE[endpoint]
+            data_type=self.endpoint_to_data_type[endpoint]
         )
-        workflow_object.data = serialized_data
-        workflow_object.extra_data['is-update'] = is_update
 
-        # why is this required, rather than being a default behaviour
+        submission_data['acquisition_source'] = dict(
+            email=current_user.email,
+            datetime=datetime.datetime.utcnow().isoformat(),
+            method='submitter',
+            submission_number=str(workflow_object.id),
+            internal_uid=int(workflow_object.id_user),
+        )
+
+        orcid = self._get_user_orcid()
+        if orcid:
+            submission_data['acquisition_source']['orcid'] = orcid
+
+        serializer = self._get_serializer_from_endpoint(endpoint)
+        serialized_data = serializer().load(submission_data).data
+
+        if control_number:
+            serialized_data['control_number'] = int(control_number)
+
+        workflow_object.data = serialized_data
+        workflow_object.extra_data['is-update'] = bool(control_number)
+
         workflow_object.extra_data['source_data'] = {
             'data': copy.deepcopy(workflow_object.data),
             'extra_data': copy.deepcopy(workflow_object.extra_data)
@@ -110,9 +126,24 @@ class SubmissionsResource(MethodView):
         workflow_object_id = workflow_object.id
 
         start.delay(
-            ENDPOINT_TO_WORKFLOW_NAME[endpoint], object_id=workflow_object.id)
+            self.endpoint_to_workflow_name[endpoint], object_id=workflow_object.id)
 
         return workflow_object_id
+
+    def _get_user_orcid(self):
+        try:
+            orcid = UserIdentity.query.filter_by(
+                id_user=current_user.get_id(),
+                method='orcid'
+            ).one().id
+            return orcid
+        except NoResultFound:
+            return None
+
+    def _get_serializer_from_endpoint(self, endpoint):
+        if endpoint not in self.endpoint_to_form_serializer:
+            abort(400)
+        return self.endpoint_to_form_serializer[endpoint]
 
 
 submissions_view = SubmissionsResource.as_view(

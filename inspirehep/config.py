@@ -56,7 +56,7 @@ FEATURE_FLAG_ENABLE_UPDATE_TO_LEGACY = False
 """This feature flag will prevent to send a ``replace`` update to legacy."""
 FEATURE_FLAG_ENABLE_SENDING_REFERENCES_TO_LEGACY = True
 FEATURE_FLAG_ENABLE_PUBLISHER_HARVESTS_CARD = True
-
+FEATURE_FLAG_ENABLE_AUTHORS_SUBMISSION = False
 # Default language and timezone
 # =============================
 BABEL_DEFAULT_LANGUAGE = 'en'
@@ -1352,7 +1352,6 @@ CRAWLER_SETTINGS = {
     "API_PIPELINE_URL": "http://localhost:5555/api/task/async-apply",
     "API_PIPELINE_TASK_ENDPOINT_DEFAULT": "inspire_crawler.tasks.submit_results",
 }
-
 # Legacy PID provider
 # ===================
 LEGACY_PID_PROVIDER = None  # e.g. "http://example.org/batchuploader/allocaterecord"

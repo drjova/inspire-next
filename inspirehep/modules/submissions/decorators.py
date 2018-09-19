@@ -20,17 +20,6 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
-# Bleeding edge packages not yet released on Pypi
--e git+https://github.com/CZ-NIC/python-rt.git@64cc54b1aa7514906be60f8bbd7e5ed18b56bba6#egg=rt
+"""Submission module."""
 
-# SWORD2 client fork
--e git+https://github.com/inspirehep/python-client-sword2.git#egg=sword2
-
-# https://github.com/inveniosoftware/dictdiffer/pull/111
--e git+https://github.com/inspirehep/dictdiffer.git#egg=dictdiffer
-
-# For testing new authors schema
-# -e git+https://github.com/vbalbp/inspire-schemas.git@michamos-author_finalization#egg=inspire-schemas
-# -e git+https://github.com/drjova/inspire-json-merger.git@test-authors#egg=inspire-json-merger
-# -e git+https://github.com/drjova/inspire-query-parser.git@test-authors#egg=inspire-query-parser
-# -e git+https://github.com/drjova/inspire-dojson.git@test-authors#egg=inspire-dojson
+from __future__ import absolute_import, division, print_function

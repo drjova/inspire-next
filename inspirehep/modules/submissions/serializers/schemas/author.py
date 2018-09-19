@@ -45,6 +45,8 @@ class Author(Schema):
 
     comments = fields.Raw()
 
+    acquisition_source = fields.Raw()
+
     @pre_dump
     def before_dump(self, data):
         author_dict = {}
@@ -52,8 +54,9 @@ class Author(Schema):
         given_name, family_name = self.get_name_splitted(data)
         author_dict.update({
             'advisors': get_value(data, 'advisors', default=missing),
+            'acquisition_source': get_value(data, 'acquisition_source', default=missing),
             'arxiv_categories': get_value(data, 'arxiv_categories', default=missing),
-            'blog': self.get_first_or_missing(get_values_for_schema(data.get('ids', []), 'BLOG')),
+            'blog': self.get_first_or_missing(self.get_value_by_description_key(data.get('urls', []), 'blog')),
             'comments': get_value(data, '_private_notes[0].value', default=missing),
             'display_name': get_value(data, 'name.preferred_name', default=missing),
             'family_name': self.get_value_or_missing(family_name),
@@ -73,6 +76,7 @@ class Author(Schema):
     def get_name_splitted(self, data):
         name = get_value(data, 'name.value')
         if name:
+            name = name.replace(',', '')
             first, last = name.split(' ')
             return first, last
 
@@ -95,7 +99,10 @@ class Author(Schema):
         for advisor in data.get('advisors', []):
             name = advisor.get('name')
             degree_type = advisor.get('degree_type')
-            author.add_advisor(name, None, degree_type)
+            ids = advisor.get('ids')
+            record = advisor.get('record')
+            author.add_advisor(
+                name, ids=ids, degree_type=degree_type, record=record)
 
         for arxiv_category in data.get('arxiv_categories', []):
             author.add_arxiv_category(arxiv_category)
@@ -156,9 +163,16 @@ class Author(Schema):
         for website in data.get('websites', []):
             author.add_url(website)
 
+        acquisition_source = data.get('acquisition_source')
+        if acquisition_source:
+            author.add_acquisition_source(**acquisition_source)
+
         return author.obj
 
     def get_full_name(self, given_name, family_name):
         if given_name and family_name:
             return '{} {}'.format(given_name, family_name)
         return given_name or family_name
+
+    def get_value_by_description_key(self, data, value):
+        return [item.get('value') for item in data if item.get('description') == value]

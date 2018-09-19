@@ -22,406 +22,714 @@
 
 from __future__ import absolute_import, division, print_function
 
+from inspire_schemas.api import load_schema, validate
+
 from inspirehep.modules.submissions.serializers.schemas import Author
 
 
-def test_dump_author():
-
-    # serialize record -> to form recor
-    author = {
-        "_collections": [
-            "Authors"
-        ],
-        "_private_notes": [
-            {
-                "source": "nostrud irure",
-                "value": "proident do adipisicing pariatur incididunt"
-            }
-        ],
-        "acquisition_source": {
-            "datetime": "3793-11-23T11:09:59.661Z",
-            "email": "2sFBUsd6@eGwRnIYRpxIbDNi.qh",
-            "internal_uid": 65521769,
-            "method": "submitter",
-            "orcid": "7219-4853-4660-9575",
-            "source": "ut fugiat nulla id sed",
-            "submission_number": "do aliqua Lorem min"
-        },
-        "advisors": [
-            {
-                "curated_relation": True,
-                "degree_type": "bachelor",
-                "ids": [
-                    {
-                        "schema": "DESY",
-                        "value": "DESY-55924820881"
-                    },
-                    {
-                        "schema": "SCOPUS",
-                        "value": "7039712595"
-                    },
-                    {
-                        "schema": "SCOPUS",
-                        "value": "8752067273"
-                    }
-                ],
-                "name": "occaecat qui sint in id",
-                "record": {
-                    "$ref": "http://1js40iZ"
-                }
-            },
-            {
-                "curated_relation": False,
-                "degree_type": "laurea",
-                "ids": [
-                    {
-                        "schema": "SCOPUS",
-                        "value": "6344523811"
-                    }
-                ],
-                "name": "deserunt nisi in",
-                "record": {
-                    "$ref": "http://12XQ"
-                }
-            },
-            {
-                "curated_relation": False,
-                "degree_type": "master",
-                "ids": [
-                    {
-                        "schema": "SCOPUS",
-                        "value": "83771302666"
-                    },
-                    {
-                        "schema": "DESY",
-                        "value": "DESY-88"
-                    },
-                    {
-                        "schema": "DESY",
-                        "value": "DESY-6994808"
-                    },
-                    {
-                        "schema": "DESY",
-                        "value": "DESY-81200252953"
-                    }
-                ],
-                "name": "deseru",
-                "record": {
-                    "$ref": "http://1U/_cD"
-                }
-            }
-        ],
-        "arxiv_categories": [
-            "math.QA",
-            "cond-mat.quant-gas",
-            "cs.NE"
-        ],
-        "awards": [
-            {
-                "name": "aute proident",
-                "url": {
-                    "description": "occaecat eiusmod",
-                    "value": "http://1w"
-                },
-                "year": 1654
-            },
-            {
-                "name": "amet consectetur aliqua",
-                "url": {
-                    "description": "consectetur dolore in",
-                    "value": "http://16zOEU"
-                },
-                "year": 2015
-            },
-            {
-                "name": "nisi exe",
-                "url": {
-                    "description": "ea culpa",
-                    "value": "http://1CIKRtW"
-                },
-                "year": 1877
-            },
-            {
-                "name": "amet magna commodo incididu",
-                "url": {
-                    "description": "aliquip ad non nulla",
-                    "value": "http://1"
-                },
-                "year": 1657
-            }
-        ],
-        "birth_date": "1485-06-28",
-        "control_number": -5145712,
-        "death_date": "1886-08-17",
-        "deleted": True,
-        "deleted_records": [
-            {
-                "$ref": "http://1Ib"
-            },
-            {
-                "$ref": "http://1v/M"
-            }
-        ],
-        "email_addresses": [
-            {
-                "current": False,
-                "hidden": True,
-                "value": "jh1eODzkDL@AKzwKXUQdjCtfLzMDlCfDIl.yf"
-            },
-            {
-                "current": True,
-                "hidden": True,
-                "value": "VUR3e@wpyAFFXWzuzGKYTMwAABYkz.nsm"
-            },
-            {
-                "current": True,
-                "hidden": True,
-                "value": "rK1tZBUNQQ@mRQxfP.cfey"
-            },
-            {
-                "current": True,
-                "hidden": True,
-                "value": "hMZ0VePfwN7lKl@EZUhLeIeFsIWIhSgZvh.onq"
-            },
-            {
-                "current": True,
-                "hidden": True,
-                "value": "xGxVc1-F@DpkGBmXIVnkkmRbKwJtKmUCznuE.bly"
-            }
-        ],
-        "ids": [
-            {
-                "schema": "CERN",
-                "value": "CERN-4728331004"
-            },
-            {
-                "value": "http://linkedin",
-                "schema": "LINKEDIN"
-            },
-            {
-                "value": "http://twitter",
-                "schema": "TWITTER"
-            },
-            {
-                "value": "http://blog",
-                "schema": "BLOG"
-            },
-        ],
-        "inspire_categories": [
-            {
-                "source": "arxiv",
-                "term": "Phenomenology-HEP"
-            },
-            {
-                "source": "user",
-                "term": "Other"
-            }
-        ],
-        "legacy_creation_date": "1535-10-12",
-        "name": {
-            "name_variants": [
-                "mollit dolore veniam",
-                "quis Ut laboris",
-                "cillum quis veniam ad ea",
-                "elit offici",
-                "nulla"
-            ],
-            "native_names": [
-                "ut mollit",
-                "occaecat aute est sint dolor"
-            ],
-            "numeration": "Jr.",
-            "preferred_name": "ut deserunt",
-            "previous_names": [
-                "Duis mollit nisi Excepteur nulla",
-                "fugiat",
-                "sit"
-            ],
-            "title": "Sir",
-            "value": "qui "
-        },
-        "new_record": {
-            "$ref": "http://1n0ybVuN"
-        },
-        "positions": [
-            {
-                "curated_relation": False,
-                "current": True,
-                "end_date": "1724-07-20",
-                "institution": "qui ea pariatur ut nisi",
-                "record": {
-                    "$ref": "http://180"
-                }
-            },
-            {
-                "curated_relation": False,
-                "current": False,
-                "end_date": "1770-04-16",
-                "institution": "irure",
-                "rank": "UNDERGRADUATE",
-                "record": {
-                    "$ref": "http://1"
-                },
-                "start_date": "1820-02-26"
-            }
-        ],
-        "project_membership": [
-            {
-                "curated_relation": False,
-                "current": False,
-                "end_date": "2016",
-                "name": "pariatur",
-                "record": {
-                    "$ref": "http://1pmlJbh"
-                },
-                "start_date": "1984"
-            },
-            {
-                "curated_relation": False,
-                "current": False,
-                "end_date": "1879",
-                "name": "veniam nisi officia dolore est",
-                "record": {
-                    "$ref": "http://15XGFW/h"
-                },
-                "start_date": "1788"
-            }
-        ],
-        "public_notes": [
-            {
-                "source": "Ut ipsum Duis ea aute",
-                "value": "non ullamco culpa quis"
-            },
-            {
-                "source": "elit",
-                "value": "sunt"
-            },
-            {
-                "source": "ut Ut dolore aute ex",
-                "value": "sit fugiat"
-            },
-            {
-                "source": "Ut in",
-                "value": "officia dolor ea voluptate"
-            },
-            {
-                "source": "veniam",
-                "value": "Lorem dolore nulla in i"
-            }
-        ],
-        "self": {
-            "$ref": "http://1MJ_/6g"
-        },
-        "status": "deceased",
-        "stub": False,
-        "urls": [
-            {
-                "description": "consequat Ut",
-                "value": "http://1So_.A"
-            },
-            {
-                "description": "ea",
-                "value": "http://1CtmBpC"
-            },
-            {
-                "description": "irure eiusmod in consectetur",
-                "value": "http://1d"
-            },
-        ],
-    }
-    result = Author().dump(author)
-    expected = {
-        'given_name': 'qui',
-        'display_name': 'ut deserunt',
-        'websites': [
-            'http://1So_.A',
-            'http://1CtmBpC',
-            'http://1d'
-        ],
-        'status': 'deceased',
-        'public_emails': [
-            'jh1eODzkDL@AKzwKXUQdjCtfLzMDlCfDIl.yf',
-            'VUR3e@wpyAFFXWzuzGKYTMwAABYkz.nsm',
-            'rK1tZBUNQQ@mRQxfP.cfey',
-            'hMZ0VePfwN7lKl@EZUhLeIeFsIWIhSgZvh.onq',
-            'xGxVc1-F@DpkGBmXIVnkkmRbKwJtKmUCznuE.bly',
-        ],
-        'blog': 'http://blog',
-        'linkedin': 'http://linkedin',
-        'twitter': 'http://twitter',
-        'arxiv_categories': [
-            'math.QA',
-            'cond-mat.quant-gas',
-            'cs.NE'
-        ],
-        'positions': [
-            {
-                'curated_relation': False,
-                'current': True,
-                'end_date': '1724-07-20',
-                'institution': 'qui ea pariatur ut nisi',
-                'record': {'$ref': 'http://180'}
-            },
-            {
-                'curated_relation': False,
-                'current': False,
-                'end_date': '1770-04-16',
-                'institution': 'irure',
-                'rank': 'UNDERGRADUATE',
-                'record': {'$ref': 'http://1'},
-                'start_date': '1820-02-26'
-            }
-        ],
-        'project_membership': [
-            {
-                'curated_relation': False,
-                'current': False,
-                'end_date': '2016',
-                'name': 'pariatur',
-                'record': {'$ref': 'http://1pmlJbh'},
-                'start_date': '1984'
-            },
-            {
-                'curated_relation': False,
-                'current': False,
-                'end_date': '1879',
-                'name': 'veniam nisi officia dolore est',
-                'record': {'$ref': 'http://15XGFW/h'},
-                'start_date': '1788'
-            },
-        ],
+def test_dump_author_advisors():
+    data = {
         'advisors': [
-            {
+           {
                 'curated_relation': True,
                 'degree_type': 'bachelor',
                 'ids': [
-                    {'schema': 'DESY', 'value': 'DESY-55924820881'},
-                    {'schema': 'SCOPUS', 'value': '7039712595'},
-                    {'schema': 'SCOPUS', 'value': '8752067273'}
+                   {'schema': 'DESY', 'value': 'DESY-55924820881'},
+                   {'schema': 'SCOPUS', 'value': '7039712595'},
+                   {'schema': 'SCOPUS', 'value': '8752067273'}
                 ],
                 'name': 'occaecat qui sint in id',
                 'record': {'$ref': 'http://1js40iZ'}
             },
-            {
-                'curated_relation': False,
-                'degree_type': 'laurea',
-                'ids': [{'schema': 'SCOPUS', 'value': '6344523811'}],
-                'name': 'deserunt nisi in',
-                'record': {'$ref': 'http://12XQ'}
-            },
-            {
-                'curated_relation': False,
-                'degree_type': 'master',
+        ]
+    }
+    schema = load_schema('authors')
+    subschema = schema['properties']['advisors']
+
+    result = Author().dump(data).data
+    expected = {
+        'advisors': [
+           {
+                'curated_relation': True,
+                'degree_type': 'bachelor',
                 'ids': [
-                    {'schema': 'SCOPUS', 'value': '83771302666'},
-                    {'schema': 'DESY', 'value': 'DESY-88'},
-                    {'schema': 'DESY', 'value': 'DESY-6994808'},
-                    {'schema': 'DESY', 'value': 'DESY-81200252953'}
+                   {'schema': 'DESY', 'value': 'DESY-55924820881'},
+                   {'schema': 'SCOPUS', 'value': '7039712595'},
+                   {'schema': 'SCOPUS', 'value': '8752067273'}
                 ],
-                'name': 'deseru',
-                'record': {'$ref': 'http://1U/_cD'}
+                'name': 'occaecat qui sint in id',
+                'record': {'$ref': 'http://1js40iZ'}
+            },
+        ]
+    }
+
+    assert validate(data['advisors'], subschema) is None
+    assert expected == result
+
+
+def test_load_author_advisors():
+    data = {
+        'advisors': [
+           {
+                'curated_relation': True,
+                'degree_type': 'bachelor',
+                'ids': [
+                   {'schema': 'DESY', 'value': 'DESY-55924820881'},
+                   {'schema': 'SCOPUS', 'value': '7039712595'},
+                   {'schema': 'SCOPUS', 'value': '8752067273'}
+                ],
+                'name': 'occaecat qui sint in id',
+                'record': {'$ref': 'http://1js40iZ'}
+            },
+        ]
+    }
+    schema = load_schema('authors')
+    subschema = schema['properties']['advisors']
+
+    result = Author().load(data).data
+    expected = {
+        '_collections': ['Authors'],
+        'advisors': [
+           {
+                'curated_relation': False,
+                'degree_type': 'bachelor',
+                'name': 'Id, Occaecat Qui Sint In',
+                'ids': [
+                   {'schema': 'DESY', 'value': 'DESY-55924820881'},
+                   {'schema': 'SCOPUS', 'value': '7039712595'},
+                   {'schema': 'SCOPUS', 'value': '8752067273'}
+                ],
+                'record': {'$ref': 'http://1js40iZ'}
+            },
+        ]
+    }
+
+    assert validate(result['advisors'], subschema) is None
+    assert expected == result
+
+
+def test_dump_author_acquisition_source():
+    data = {
+        'acquisition_source': {
+            'method': 'submitter',
+            'submission_number': '12',
+            'internal_uid': 1,
+            'email': 'albert.einstein@hep.edu',
+            'orcid': '0000-0001-8528-2091',
+        },
+    }
+    schema = load_schema('authors')
+    subschema = schema['properties']['acquisition_source']
+
+    result = Author().dump(data).data
+    expected = {
+        'acquisition_source': {
+            'method': 'submitter',
+            'submission_number': '12',
+            'internal_uid': 1,
+            'email': 'albert.einstein@hep.edu',
+            'orcid': '0000-0001-8528-2091',
+        },
+    }
+
+    assert validate(data['acquisition_source'], subschema) is None
+    assert expected == result
+
+
+def test_load_author_acquisition_source():
+    data = {
+        'acquisition_source': {
+            'method': 'submitter',
+            'submission_number': '12',
+            'internal_uid': 1,
+            'email': 'albert.einstein@hep.edu',
+            'orcid': '0000-0001-8528-2091',
+        },
+    }
+    schema = load_schema('authors')
+    subschema = schema['properties']['acquisition_source']
+
+    result = Author().load(data).data
+    expected = {
+        '_collections': ['Authors'],
+        'acquisition_source': {
+            'method': 'submitter',
+            'submission_number': '12',
+            'internal_uid': 1,
+            'email': 'albert.einstein@hep.edu',
+            'orcid': '0000-0001-8528-2091',
+        },
+    }
+
+    assert validate(result['acquisition_source'], subschema) is None
+    assert expected == result
+
+def test_dump_author_arxiv_categories():
+    data = {
+        'arxiv_categories': [
+            'math.CV',
+            'astro-ph.HE',
+            'econ.EM',
+        ],
+    }
+    schema = load_schema('authors')
+    subschema = schema['properties']['arxiv_categories']
+
+    result = Author().dump(data).data
+    expected = {
+        'arxiv_categories': [
+            'math.CV',
+            'astro-ph.HE',
+            'econ.EM',
+        ],
+    }
+
+    assert validate(data['arxiv_categories'], subschema) is None
+    assert expected == result
+
+
+def test_load_author_arxiv_categories():
+    data = {
+        'arxiv_categories': [
+            'math.CV',
+            'astro-ph.HE',
+            'econ.EM',
+        ],
+    }
+    schema = load_schema('authors')
+    subschema = schema['properties']['arxiv_categories']
+
+    result = Author().load(data).data
+    expected = {
+        '_collections': ['Authors'],
+        'arxiv_categories': [
+            'math.CV',
+            'astro-ph.HE',
+            'econ.EM',
+        ],
+    }
+
+    assert validate(result['arxiv_categories'], subschema) is None
+    assert expected == result
+
+
+def test_dump_author_blog():
+    data = {
+        'urls': [
+            {
+                'value': 'https:/myblog.com',
+                'description': 'blog',
             },
         ],
-        'comments': 'proident do adipisicing pariatur incididunt'
     }
-    assert expected == result.data
+    schema = load_schema('authors')
+    subschema = schema['properties']['urls']
+
+    result = Author().dump(data).data
+    expected = {
+        'blog': 'https:/myblog.com',
+        'websites': [
+            'https:/myblog.com',
+        ],
+    }
+
+    assert validate(data['urls'], subschema) is None
+    assert expected == result
+
+
+def test_dump_author_without_blog():
+    data = {
+        'urls': [
+           {
+                'value': 'https://www.linkedin.com/in/example-12345/',
+                'description': 'something_else',
+            },
+        ],
+    }
+
+    result = Author().dump(data).data
+    expected = {
+        'websites': [
+            'https://www.linkedin.com/in/example-12345/',
+        ]
+    }
+
+    assert expected == result
+
+
+def test_load_author_blog():
+    data = {
+        'blog': 'https:/myblog.com',
+    }
+    schema = load_schema('authors')
+    subschema = schema['properties']['urls']
+
+    result = Author().load(data).data
+    expected = {
+        '_collections': ['Authors'],
+        'urls':  [
+           {
+                'value': 'https:/myblog.com',
+                'description': 'blog',
+            },
+        ],
+    }
+    assert validate(expected['urls'], subschema) is None
+    assert expected == result
+
+
+def test_dump_author_linkedin():
+    data = {
+        'ids': [
+           {
+                'value': 'https:/linkedin.com',
+                'schema': 'LINKEDIN',
+            },
+        ],
+    }
+    schema = load_schema('authors')
+    subschema = schema['properties']['ids']
+
+    result = Author().dump(data).data
+    expected = {
+        'linkedin': 'https:/linkedin.com',
+    }
+
+    assert validate(data['ids'], subschema) is None
+    assert expected == result
+
+
+def test_load_author_linkedin():
+    data = {
+        'linkedin': 'https:/linkedin.com',
+    }
+    schema = load_schema('authors')
+    subschema = schema['properties']['ids']
+
+    result = Author().load(data).data
+    expected = {
+        '_collections': ['Authors'],
+        'ids': [
+           {
+                'schema': 'LINKEDIN',
+                'value': 'https:/linkedin.com',
+            },
+        ],
+    }
+
+    assert validate(expected['ids'], subschema) is None
+    assert expected == result
+
+def test_dump_author_twitter():
+    data = {
+        'ids': [
+           {
+                'value': 'https:/twitter.com',
+                'schema': 'TWITTER',
+            },
+        ],
+    }
+    schema = load_schema('authors')
+    subschema = schema['properties']['ids']
+
+    result = Author().dump(data).data
+    expected = {
+        'twitter': 'https:/twitter.com',
+    }
+
+    assert validate(data['ids'], subschema) is None
+    assert expected == result
+
+
+def test_load_author_twitter():
+    data = {
+        'twitter': 'https:/twitter.com',
+    }
+    schema = load_schema('authors')
+    subschema = schema['properties']['ids']
+
+    result = Author().load(data).data
+    expected = {
+        '_collections': ['Authors'],
+        'ids': [
+           {
+                'schema': 'TWITTER',
+                'value': 'https:/twitter.com',
+            },
+        ],
+    }
+
+    assert validate(expected['ids'], subschema) is None
+    assert expected == result
+
+
+def test_dump_author_comments():
+    data = {
+        '_private_notes': [
+           {
+                'value': 'THIS IS A NOTE',
+            },
+        ],
+    }
+    schema = load_schema('authors')
+    subschema = schema['properties']['_private_notes']
+
+    result = Author().dump(data).data
+    expected = {
+        'comments': 'THIS IS A NOTE',
+    }
+
+    assert validate(data['_private_notes'], subschema) is None
+    assert expected == result
+
+
+def test_load_author_comments():
+    data = {
+        'comments': 'THIS IS A NOTE',
+    }
+    schema = load_schema('authors')
+    subschema = schema['properties']['_private_notes']
+
+    result = Author().load(data).data
+    expected = {
+        '_collections': ['Authors'],
+        '_private_notes': [
+           {
+                'value': 'THIS IS A NOTE',
+            },
+        ],
+    }
+
+    assert validate(expected['_private_notes'], subschema) is None
+    assert expected == result
+
+
+def test_dump_author_display_name():
+    data = {
+        'name': {
+            'preferred_name': 'PREFERRED NAME',
+        }
+    }
+
+    result = Author().dump(data).data
+    expected = {
+        'display_name': 'PREFERRED NAME',
+    }
+
+    assert expected == result
+
+
+def test_load_author_display_name():
+    data = {
+        'display_name': 'PREFERRED NAME'
+    }
+
+    result = Author().load(data).data
+    expected = {
+        '_collections': ['Authors'],
+        'name': {
+            'preferred_name': 'PREFERRED NAME'
+        }
+    }
+
+    assert expected == result
+
+
+def test_dump_author_given_and_family_name():
+    data = {
+        'name': {
+            'value': 'FIRSTNAME, LASTNAME',
+        }
+    }
+
+    result = Author().dump(data).data
+    expected = {
+        'family_name': 'LASTNAME',
+        'given_name': 'FIRSTNAME',
+    }
+
+    assert expected == result
+
+
+def test_load_author_given_and_family_name():
+    data = {
+        'family_name': 'LASTNAME',
+        'given_name': 'FIRSTNAME',
+    }
+
+    result = Author().load(data).data
+    expected = {
+        '_collections': ['Authors'],
+        'name': {
+            'value': 'Firstname, Lastname',
+        },
+    }
+
+    assert expected == result
+
+
+def test_dump_author_positions():
+    data = {
+        'positions': [
+            {
+                'institution': 'Colgate University',
+                'start_date': u'1994-02-01',
+                'end_date': u'1995-01-31',
+                'rank': 'PHD',
+                'curated_relation': True,
+                'current': False,
+            },
+        ],
+    }
+
+    result = Author().dump(data).data
+    schema = load_schema('authors')
+    subschema = schema['properties']['positions']
+
+    expected = {
+        'positions': [
+            {
+                'institution': 'Colgate University',
+                'start_date': u'1994-02-01',
+                'end_date': u'1995-01-31',
+                'rank': 'PHD',
+                'curated_relation': True,
+                'current': False,
+            },
+        ],
+    }
+    assert validate(data['positions'], subschema) is None
+    assert expected == result
+
+
+def test_load_author_positions():
+    data = {
+        'positions': [
+            {
+                'institution': 'Colgate University',
+                'start_date': u'1994-02-01',
+                'end_date': u'1995-01-31',
+                'rank': 'PHD',
+                'curated_relation': True,
+                'current': False,
+            },
+        ],
+    }
+
+    result = Author().load(data).data
+    schema = load_schema('authors')
+    subschema = schema['properties']['positions']
+
+    expected = {
+        '_collections': ['Authors'],
+        'positions': [
+            {
+                'curated_relation': False,
+                'current': False,
+                'end_date': u'1995-01-31',
+                'institution': 'Colgate University',
+                'rank': 'PHD',
+                'start_date': u'1994-02-01',
+            },
+        ],
+    }
+
+    assert validate(expected['positions'], subschema) is None
+    assert expected == result
+
+
+def test_dump_author_project_membership():
+    data = {
+        'project_membership': [
+            {
+                'institution': 'Colgate University',
+                'start_date': u'1994-02-01',
+                'end_date': u'1995-01-31',
+                'rank': 'PHD',
+                'curated_relation': True,
+                'current': False,
+            },
+        ],
+    }
+
+    result = Author().dump(data).data
+    schema = load_schema('authors')
+    subschema = schema['properties']['positions']
+
+    expected = {
+        'project_membership': [
+            {
+                'institution': 'Colgate University',
+                'start_date': u'1994-02-01',
+                'end_date': u'1995-01-31',
+                'rank': 'PHD',
+                'curated_relation': True,
+                'current': False,
+            },
+        ],
+    }
+    assert validate(data['project_membership'], subschema) is None
+    assert expected == result
+
+
+def test_load_author_project_membership():
+    data = {
+        'project_membership': [
+            {
+                'name': 'pariatur',
+                'start_date': u'1997-05-01',
+                'end_date': u'2001-12-31',
+                'record': {
+                    '$ref': 'http://180'
+                },
+                'curated_relation': True,
+                'current': True
+            }
+        ],
+    }
+
+    result = Author().load(data).data
+    schema = load_schema('authors')
+    subschema = schema['properties']['project_membership']
+
+    expected = {
+        '_collections': ['Authors'],
+        'project_membership': [
+            {
+                'curated_relation': False,
+                'current': True,
+                'end_date': u'2001-12-31',
+                'name': 'pariatur',
+                'start_date': u'1997-05-01',
+            },
+        ],
+    }
+
+    assert validate(expected['project_membership'], subschema) is None
+    assert expected == result
+
+
+def test_dump_author_public_emails():
+    data = {
+        'email_addresses': [
+            {
+                'value': 'email@email.com',
+            },
+        ],
+    }
+
+    result = Author().dump(data).data
+    schema = load_schema('authors')
+    subschema = schema['properties']['email_addresses']
+
+    expected = {
+        'public_emails': [
+            'email@email.com',
+        ],
+    }
+    assert validate(data['email_addresses'], subschema) is None
+    assert expected == result
+
+
+def test_load_author_public_emails():
+    data = {
+        'public_emails': [
+            'email@email.com',
+        ],
+    }
+
+    result = Author().load(data).data
+    schema = load_schema('authors')
+    subschema = schema['properties']['email_addresses']
+
+    expected = {
+        '_collections': ['Authors'],
+        'email_addresses': [
+            {
+                'value': 'email@email.com',
+            },
+        ],
+    }
+
+    assert validate(expected['email_addresses'], subschema) is None
+    assert expected == result
+
+
+def test_dump_author_status():
+    data = {
+        'status': 'active',
+    }
+
+    result = Author().dump(data).data
+    schema = load_schema('authors')
+    subschema = schema['properties']['status']
+
+    expected = {
+        'status': 'active',
+    }
+    assert validate(data['status'], subschema) is None
+    assert expected == result
+
+
+def test_load_author_status():
+    data = {
+        'status': 'active',
+    }
+
+    result = Author().load(data).data
+    schema = load_schema('authors')
+    subschema = schema['properties']['status']
+
+    expected = {
+        '_collections': ['Authors'],
+        'status': 'active',
+    }
+
+    assert validate(expected['status'], subschema) is None
+    assert expected == result
+
+
+def test_dump_author_websites():
+    data = {
+        'urls': [
+            {
+                'value': 'http://website.com',
+            },
+        ],
+    }
+
+    result = Author().dump(data).data
+    schema = load_schema('authors')
+    subschema = schema['properties']['urls']
+
+    expected = {
+        'websites': [
+            'http://website.com',
+        ],
+    }
+    assert validate(data['urls'], subschema) is None
+    assert expected == result
+
+
+def test_load_author_websites():
+    data = {
+        'websites': [
+            'http://website.com',
+        ],
+    }
+
+    result = Author().load(data).data
+    schema = load_schema('authors')
+    subschema = schema['properties']['urls']
+
+    expected = {
+        '_collections': ['Authors'],
+        'urls': [
+            {
+                'value': 'http://website.com',
+            },
+        ],
+    }
+
+    assert validate(expected['urls'], subschema) is None
+    assert expected == result

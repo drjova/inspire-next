@@ -29,6 +29,7 @@ from unicodedata import normalize
 
 import six
 
+from flask import current_app
 from inspire_dojson.utils import get_recid_from_ref
 from inspire_utils.date import earliest_date
 from inspire_utils.name import generate_name_variations
@@ -403,8 +404,10 @@ def get_citations_from_es(record, page=1, size=10):
     ).sort('-earliest_date').execute().hits
 
 
-def populate_author_suggest(sender, json, *args, **kwargs):
+def populate_author_suggest(json, *args, **kwargs):
     """Populate the ``author_suggest`` field of Authors records."""
+    if not current_app.config.get('FEATURE_FLAG_ENABLE_AUTHORS_SUBMISSION'):
+        return None
 
     author_paths = [
         'name.preferred_name',

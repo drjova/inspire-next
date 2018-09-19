@@ -170,6 +170,7 @@ def close_ticket(ticket_id_key="ticket_id"):
     @with_debug_logging
     @wraps(close_ticket)
     def _close_ticket(obj, eng):
+        return {}
         ticket_id = obj.extra_data.get(ticket_id_key, "")
         if not ticket_id:
             obj.log.error("No ticket ID found!")

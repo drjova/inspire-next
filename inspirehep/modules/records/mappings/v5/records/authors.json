@@ -10,28 +10,6 @@
         "$schema": {
           "type": "string"
         },
-        "awards": {
-          "type": "object",
-          "properties": {
-            "name": {
-              "type": "string"
-            },
-            "year": {
-              "type": "integer"
-            },
-            "url": {
-              "type": "object",
-              "properties": {
-                "description": {
-                  "type": "string"
-                },
-                "value": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        },
         "author_suggest": {
           "type": "completion"
         },
