@@ -1688,3 +1688,35 @@ FUZZY_MATCH = {
 APPMETRICS_ELASTICSEARCH_HOSTS = ['localhost']
 APPMETRICS_ELASTICSEARCH_INDEX = 'inspireappmetrics-dev'
 APPMETRICS_THREADED_BACKEND = True
+
+# Alembic
+# =======
+
+ALEMBIC_SKIP_TABLES = [
+    "access_actionsusers",
+    "access_actionsroles",
+    "access_actionssystemroles",
+    "oauth2server_client",
+    "oauth2server_token",
+    "oauthclient_remoteaccount",
+    "oauthclient_useridentity",
+    "oauthclient_remotetoken",
+    "userprofiles_userprofile",
+    "accounts_role",
+    "accounts_user",
+    "accounts_user_session_activity",
+    "files_location",
+    "files_bucket",
+    "files_buckettags",
+    "files_files",
+    "files_object",
+    "files_objecttags",
+    "files_multipartobject",
+    "files_multipartobject_part",
+    "files_location",
+    "pidstore_pid",
+    "pidstore_redirect",
+    "pidstore_recid",
+    "transaction",
+    "inspirehep_alembic_version",
+]
