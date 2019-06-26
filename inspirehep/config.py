@@ -1691,20 +1691,25 @@ APPMETRICS_THREADED_BACKEND = True
 
 # Alembic
 # =======
-
 ALEMBIC_SKIP_TABLES = [
+    # invenio-access
     "access_actionsusers",
     "access_actionsroles",
     "access_actionssystemroles",
+    # invenio-oauth2server
     "oauth2server_client",
     "oauth2server_token",
+    # invenio-oauthclient
     "oauthclient_remoteaccount",
     "oauthclient_useridentity",
     "oauthclient_remotetoken",
+    # invenio-userprofiles
     "userprofiles_userprofile",
+    # invenio-accounts
     "accounts_role",
     "accounts_user",
     "accounts_user_session_activity",
+    # invenio-files-rest
     "files_location",
     "files_bucket",
     "files_buckettags",
@@ -1714,9 +1719,11 @@ ALEMBIC_SKIP_TABLES = [
     "files_multipartobject",
     "files_multipartobject_part",
     "files_location",
+    # invenio-pidstore
     "pidstore_pid",
     "pidstore_redirect",
     "pidstore_recid",
+    "legacy_records_mirror",
     "transaction",
     "inspirehep_alembic_version",
 ]
