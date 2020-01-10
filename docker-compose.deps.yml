@@ -27,7 +27,7 @@ services:
     extends:
       file: services.yml
       service: base
-    command: bash -c "pip install poetry && poetry export --without-hashes -E all -f requirements.txt > requirements.poetry.txt && pip install --requirement requirements.poetry.txt && pip install --ignore-installed -e ."
+    command: bash -c "pip install poetry && poetry export --without-hashes -E all -E docs -E tests -f requirements.txt > requirements.poetry.txt && pip install --requirement requirements.poetry.txt && pip install --ignore-installed -e ."
     volumes_from:
       - static
   assets:
